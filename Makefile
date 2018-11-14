@@ -20,7 +20,7 @@ latest:
 test: test-latest
 
 test-latest:
-	if [ "`docker run jamesbrink/template cat /etc/alpine-release`" != "3.7.0" ]; then exit 1;fi
+	if [ "`docker run jamesbrink/template cat /etc/alpine-release`" != "3.8.1" ]; then exit 1;fi
 	if [ "`docker run jamesbrink/template cat /template/version.txt`" != "0.1.0" ]; then exit 1;fi
 
 clean:

@@ -5,3 +5,4 @@ README.md
 LICENSE
 hooks
 Dockerfile
+Makefile
