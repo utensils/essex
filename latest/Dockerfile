@@ -8,10 +8,10 @@ ARG TEMPLATE_VERSION="0.1.0"
 # Labels / Metadata.
 LABEL maintainer="James Brink, brink.james@gmail.com" \
     decription="Template" \
-    version="0.1.0" \
+    version="${TEMPLATE_VERSION}" \
     org.label-schema.name="template" \
-    org.label-schema.build-date=$BUILD_DATE \
-    org.label-schema.vcs-ref=$VCS_REF \
+    org.label-schema.build-date="${BUILD_DATE}" \
+    org.label-schema.vcs-ref="${VCS_REF}" \
     org.label-schema.vcs-url="https://github.com/jamesbrink/docker-template" \
     org.label-schema.schema-version="1.0.0-rc1"
 
@@ -21,7 +21,7 @@ RUN addgroup -g 1000 -S template \
 
 # Install deps.
 RUN set -xe; \
-    apk --update add --no-cache --virtual .runtime-deps bash; \
+    apk add --update  --no-cache --virtual .runtime-deps bash; \
     echo "${TEMPLATE_VERSION}" > /template/version.txt; \
     chown template:template /template/version.txt;
 
