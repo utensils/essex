@@ -3,6 +3,7 @@
 NAME=jamesbrink/template
 TEMPLATE=Dockerfile.template
 DOCKER_COMPOSE_TEMPLATE=docker-compose.template
+SHELL=/usr/bin/env bash
 .PHONY: test all clean latest
 .DEFAULT_GOAL := latest
 
@@ -20,7 +21,7 @@ latest:
 test: test-latest
 
 test-latest:
-	if [ "`docker run jamesbrink/template cat /etc/alpine-release`" != "3.8.1" ]; then exit 1;fi
+	if [ "`docker run jamesbrink/template cat /etc/alpine-release`" != "3.9.0" ]; then exit 1;fi
 	if [ "`docker run jamesbrink/template cat /template/version.txt`" != "0.1.0" ]; then exit 1;fi
 
 clean:
