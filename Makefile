@@ -1,28 +1,41 @@
 #!/usr/bin/make -f
 
-NAME=jamesbrink/template
-TEMPLATE=Dockerfile.template
-DOCKER_COMPOSE_TEMPLATE=docker-compose.template
-SHELL=/usr/bin/env bash
-.PHONY: test all clean latest
-.DEFAULT_GOAL := latest
+SHELL                   := /usr/bin/env bash
+DOCKER_NAMESPACE        ?= utensils
+IMAGE_NAME              ?= template
+BASE_IMAGE              ?= alpine:3.10
+VERSION                 := $(shell git describe --tags --abbrev=0 2>/dev/null || git rev-parse --abbrev-ref HEAD)
+VCS_REF                 := $(shell git rev-parse --short HEAD)
+BUILD_DATE              := $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-all: latest
+# Default target is to build container
+.PHONY: default
+default: build
 
-latest:
-	mkdir -p $(@)
-	cp -rp docker-assets $(@)
-	cp -rp hooks $(@)
-	cp Dockerfile.template $(@)/Dockerfile
-	cp .dockerignore $(@)/.dockerignore
-	sed -i -r 's/ARG TEMPLATE_VERSION.*/ARG TEMPLATE_VERSION="0.1.0"/g' $(@)/Dockerfile
-	cd $(@) && TEMPLATE_VERSION="0.1.0" IMAGE_NAME=$(NAME):$(@) ./hooks/build
+# Build the docker image
+.PHONY: build
+build: list
+	docker build \
+		--build-arg BASE_IMAGE=$(BASE_IMAGE) \
+		--build-arg BUILD_DATE=$(BUILD_DATE) \
+		--build-arg VCS_REF=$(VCS_REF) \
+		--build-arg VERSION=$(VERSION) \
+		--tag $(DOCKER_NAMESPACE)/$(IMAGE_NAME):latest \
+		--tag $(DOCKER_NAMESPACE)/$(IMAGE_NAME):$(VCS_REF) \
+		--tag $(DOCKER_NAMESPACE)/$(IMAGE_NAME):$(VERSION) \
+		--file Dockerfile .
 
-test: test-latest
+# List built images
+.PHONY: list
+list:
+	docker images $(DOCKER_NAMESPACE)/$(IMAGE_NAME) --filter "dangling=false"
 
-test-latest:
-	if [ "`docker run jamesbrink/template cat /etc/alpine-release`" != "3.9.0" ]; then exit 1;fi
-	if [ "`docker run jamesbrink/template cat /template/version.txt`" != "0.1.0" ]; then exit 1;fi
+# Run any tests
+.PHONY: test
+test:
+	docker run -t $(DOCKER_NAMESPACE)/$(IMAGE_NAME) cat version.txt | grep $(VERSION)
 
+# Remove existing images
+.PHONY: clean
 clean:
-	rm -rf latest
+	docker rmi $$(docker images $(DOCKER_NAMESPACE)/$(IMAGE_NAME) --format="{{.Repository}}:{{.Tag}}") --force
