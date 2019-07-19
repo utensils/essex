@@ -6,6 +6,9 @@ The goal of this project is to provide a consistent boilerplate and templates fo
 
 ## Goals
 
+ * Allow easy creation of Dockerfiles using best practices
+ * Use a `Makefile` driven build workflow
+ * Easily maintain consistency between projects using Docker
  * All images will have valid Labels/Annotations. See the Open Container Initiative [image-spec](https://github.com/opencontainers/image-spec/blob/master/annotations.md)
 
 
