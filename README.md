@@ -7,3 +7,12 @@ The goal of this project is to provide a consistent boilerplate and templates fo
 ## Goals
 
  * All images will have valid Labels/Annotations. See the Open Container Initiative [image-spec](https://github.com/opencontainers/image-spec/blob/master/annotations.md)
+
+
+## Installation
+
+To install Essex you can either clone this repository to any location on your machine and add it to your `$PATH`.
+Or you can install with the following:  
+```shell
+\curl -sSL  https://raw.githubusercontent.com/utensils/essex/master/install.sh | bash -s
+```
