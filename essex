@@ -22,6 +22,7 @@ usage() {
 		 Usage:
 		 	essex list
 		 	essex new <template> <ProjectName>
+			essex update
 		
 		 Examples:
 		  	essex new basic MyApp
@@ -43,6 +44,11 @@ list(){
 	done
 }
 
+update(){
+	echo "Updating Essex"
+	git --git-dir="$ESSEX_PATH"/.git pull origin
+}
+
 # Create a new project from a template
 new(){
 	echo "Creating new project..."
@@ -53,6 +59,7 @@ while true; do
   case "$1" in
     list) list; exit $? ;;
 	new) list; exit $? ;;
+	update) update; exit $? ;;
     * ) usage; exit 0 ;;
   esac
 done
