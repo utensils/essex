@@ -9,7 +9,7 @@ TEMPLATES               := basic
 $(TEMPLATES):
 	make_goals="$(MAKECMDGOALS)"; \
 	goals="$${make_goals#$(@)}"; \
-	$(MAKE) -C $@ $$goals;
+	$(MAKE) -C templates/$@ $$goals;
 	
 # Kind of hacky, catch non-existent targets here?
 %:

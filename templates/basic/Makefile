@@ -2,7 +2,7 @@
 
 SHELL                   := /usr/bin/env bash
 DOCKER_NAMESPACE        ?= utensils
-IMAGE_NAME              ?= basic-template
+IMAGE_NAME              ?= essex-basic
 BASE_IMAGE              ?= alpine:3.10
 VERSION                 := $(shell git describe --tags --abbrev=0 2>/dev/null || git rev-parse --abbrev-ref HEAD)
 VCS_REF                 := $(shell git rev-parse --short HEAD)
