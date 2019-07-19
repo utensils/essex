@@ -21,3 +21,21 @@ Or you can install with the following:
 ```shell
 \curl -sSL  https://raw.githubusercontent.com/utensils/essex/master/install.sh | bash -s
 ```
+
+## Usage
+
+List available Docker templates:
+```shell
+essex list
+```  
+
+Create a new project using a template:
+```shell
+essex new basic MyProject
+```  
+
+Update Essex:
+```shell
+essex update
+```
+
