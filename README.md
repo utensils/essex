@@ -10,7 +10,7 @@ Essex is a CLI utility written in bash to quickly setup consistent and clean Doc
 
  * Allow easy creation of Dockerfiles using best practices
  * Use a `Makefile` driven build workflow
- * Easily maintain consistency between projects using Docker
+ * Easily maintain consistency between projects using that use Docker
  * All images will have valid Labels/Annotations. See the Open Container Initiative [image-spec](https://github.com/opencontainers/image-spec/blob/master/annotations.md)
 
 
