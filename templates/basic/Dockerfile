@@ -1,18 +1,16 @@
 ARG BASE_IMAGE=alpine:latest
 FROM ${BASE_IMAGE}
 
-# Create our group & user.
-RUN addgroup -g 1000 -S essex; \
-    adduser -u 1000 -S -h /essex -s /bin/sh -G essex essex
-
 # Install deps.
-ARG VERSION
 RUN set -xe; \
     apk add --update  --no-cache --virtual .runtime-deps \
         ca-certificates \
-        tzdata; \
-    echo "${VERSION}" > /essex/version.txt; \
-    chown essex:essex /essex/version.txt;
+        tzdata;
+
+# Create our group & user.
+RUN set -xe; \
+    addgroup -g 1000 -S essex; \
+    adduser -u 1000 -S -h /essex -s /bin/sh -G essex essex;
 
 # Copy our entrypoint into the container.
 COPY ./runtime-assets /
@@ -31,11 +29,12 @@ LABEL \
     org.opencontainers.image.source="https://github.com/utensils/essex" \
     org.opencontainers.image.title="essex-basic" \
     org.opencontainers.image.vendor="Utensils" \
-    org.opencontainers.image.version="${VERSION}" \
-    org.opencontainers.image.version="1.0.0-rc1"
+    org.opencontainers.image.version="${VERSION}"
 
 # Setup our environment variables.
-ENV PATH="/usr/local/bin:$PATH"
+ENV \
+    PATH="/usr/local/bin:$PATH" \
+    VERSION="${VERSION}"
 
 # Drop down to our unprivileged user.
 USER essex

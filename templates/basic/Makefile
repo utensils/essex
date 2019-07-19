@@ -33,7 +33,7 @@ list:
 # Run any tests
 .PHONY: test
 test:
-	docker run -t $(DOCKER_NAMESPACE)/$(IMAGE_NAME) cat version.txt | grep $(VERSION)
+	docker run -t $(DOCKER_NAMESPACE)/$(IMAGE_NAME) env | grep VERSION | grep $(VERSION)
 
 # Remove existing images
 .PHONY: clean

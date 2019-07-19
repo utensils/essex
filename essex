@@ -1,0 +1,82 @@
+#!/usr/bin/env bash
+
+# Setup the Essex Path
+ESSEX_PATH="$(cd "$(dirname "$0")" ; pwd -P )" || exit 1
+
+# Set Colors
+bold=$(tput bold)
+reset=$(tput sgr0)
+purple=$(tput setaf 171)
+red=$(tput setaf 1)
+green=$(tput setaf 76)
+tan=$(tput setaf 3)
+blue=$(tput setaf 38)
+underline=$(tput sgr 0 1)
+
+# Print usage information
+usage() {
+	cat <<-EOF
+		 ${bold}Essex $(version): Boilerplate for Docker Based Projects.${reset}
+		 License: MIT Copyright (c) 2019 Utensils Union
+		
+		 Usage:
+		 	essex list
+		 	essex new <template> <ProjectName>
+		
+		 Examples:
+		  	essex new basic MyApp
+		
+	EOF
+}
+
+# Print version information
+version() {
+	git describe --tags --abbrev=0 2>/dev/null || git rev-parse --abbrev-ref HEAD
+}
+
+# List available templates
+list(){
+	echo "Available templates:"
+	for template in "$ESSEX_PATH"/templates/*
+	do
+		echo "  $(basename "$template")"
+	done
+}
+
+# Create a new project from a template
+new(){
+	echo "Creating new project..."
+}
+
+# Parse any subcommands
+while true; do
+  case "$1" in
+    list) list; exit $? ;;
+	new) list; exit $? ;;
+    * ) usage; exit 0 ;;
+  esac
+done
+
+# Parse short and long options
+OPTS=$(getopt -o vh: --long verbose,help: -n 'parse-options' -- "$@")
+
+if [ $? != 0 ]
+then 
+	echo "Failed parsing options." >&2
+	exit 1
+fi
+
+eval set -- "$OPTS"
+
+VERBOSE=false
+
+while true; do
+  case "$1" in
+    -v | --verbose ) VERBOSE=true; shift ;;
+    -h | --help ) usage;break;;
+    -- ) shift; break ;;
+    * ) break ;;
+  esac
+done
+
+exit 0
