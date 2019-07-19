@@ -40,7 +40,12 @@ list(){
 	echo "Available templates:"
 	for template in "$ESSEX_PATH"/templates/*
 	do
-		echo "  $(basename "$template")"
+		if [ -f "$template"/.description ]
+		then
+			echo "  ${bold}$(basename "$template")${reset} - $(cat $template/.description)"
+		else
+			echo "  ${bold}$(basename "$template")${reset}"
+		fi
 	done
 }
 
