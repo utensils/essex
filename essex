@@ -22,7 +22,7 @@ usage() {
 		 Usage:
 		 	essex list
 		 	essex new <template> <ProjectName>
-			essex update
+		 	essex update
 		
 		 Examples:
 		  	essex new basic MyApp
