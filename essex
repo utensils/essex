@@ -22,11 +22,16 @@ usage() {
 		
 		 Usage:
 		 	essex list
-		 	essex new <template> <ProjectName>
+		 	essex new <template> <ProjectName> [OPTION]...
 		 	essex update
-		
+
+		 Options:
+		 	-v, --vendor [NAME]		Sets the vendor name of the project.
+
 		 Examples:
 		  	essex new basic MyApp
+		 	essex new basic MyApp --vendor utensils
+
 		
 	EOF
 }
@@ -73,6 +78,15 @@ project_maintainer(){
 project_name(){
 	local name="$1"
 	sed -r -i 's/(^IMAGE_NAME.+\?= ).+$/\1'"$name"'/g' Makefile
+	sed -i 's/org.opencontainers.image.title=.* \\/org.opencontainers.image.title="'"$name"'" \\/g' Dockerfile
+}
+
+# Update the projects vendor
+project_vendor(){
+	local vendor="$1"
+	echo "Setting Vendor: $vendor"
+	sed -r -i 's/(^DOCKER_NAMESPACE.+\?= ).+$/\1'"$vendor"'/g' Makefile
+	sed -i 's/org.opencontainers.image.vendor=.* \\/org.opencontainers.image.vendor="'"$vendor"'" \\/g' Dockerfile
 }
 
 # Create a new project from a template
@@ -103,14 +117,14 @@ new(){
 while true; do
   case "$1" in
     list) list; exit $? ;;
-	new) new "$@"; exit $? ;;
+	new) new "$@"; shift 3 ; break ;;
 	update) update; exit $? ;;
     * ) usage; exit 0 ;;
   esac
 done
 
 # Parse short and long options
-OPTS=$(getopt -o vh: --long verbose,help: -n 'parse-options' -- "$@")
+OPTS=$(getopt -o vh: --long vendor,help: -n 'parse-options' -- "$@")
 
 # shellcheck disable=SC2181
 if [ $? != 0 ]
@@ -121,11 +135,9 @@ fi
 
 eval set -- "$OPTS"
 
-VERBOSE=false
-
 while true; do
   case "$1" in
-    -v | --verbose ) VERBOSE=true; shift ;;
+    -v | --vendor ) shift 2; project_vendor "$1" ;;
     -h | --help ) usage;break;;
     -- ) shift; break ;;
     * ) break ;;
