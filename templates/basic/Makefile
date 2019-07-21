@@ -4,8 +4,8 @@ SHELL                   := /usr/bin/env bash
 DOCKER_NAMESPACE        ?= utensils
 IMAGE_NAME              ?= essex-basic
 BASE_IMAGE              ?= alpine:3.10
-VERSION                 := $(shell git describe --tags --abbrev=0 2>/dev/null || git rev-parse --abbrev-ref HEAD)
-VCS_REF                 := $(shell git rev-parse --short HEAD)
+VERSION                 := $(shell git describe --tags --abbrev=0 2>/dev/null || git rev-parse --abbrev-ref HEAD 2>/dev/null)
+VCS_REF                 := $(shell git rev-parse --short HEAD 2>/dev/null || echo "None")
 BUILD_DATE              := $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 
 # Default target is to build container

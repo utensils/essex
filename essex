@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2034
 
 # Setup the Essex Path
 ESSEX_PATH="$(cd "$(dirname "$0")" ; pwd -P )" || exit 1
@@ -42,7 +43,7 @@ list(){
 	do
 		if [ -f "$template"/.description ]
 		then
-			echo "  ${bold}$(basename "$template")${reset} - $(cat $template/.description)"
+			echo "  ${bold}$(basename "$template")${reset} - $(cat "$template"/.description)"
 		else
 			echo "  ${bold}$(basename "$template")${reset}"
 		fi
@@ -56,14 +57,21 @@ update(){
 
 # Create a new project from a template
 new(){
-	echo "Creating new project..."
+	local template="$2"
+	local project="$3"
+
+	echo "Creating new project $project using template: $template"
+	mkdir -p "$project"
+	cd "$project" || exit 1
+	git init
+	cp -rv "$ESSEX_PATH"/templates/"$template"/* ./
 }
 
 # Parse any subcommands
 while true; do
   case "$1" in
     list) list; exit $? ;;
-	new) list; exit $? ;;
+	new) new "$@"; exit $? ;;
 	update) update; exit $? ;;
     * ) usage; exit 0 ;;
   esac
@@ -72,6 +80,7 @@ done
 # Parse short and long options
 OPTS=$(getopt -o vh: --long verbose,help: -n 'parse-options' -- "$@")
 
+# shellcheck disable=SC2181
 if [ $? != 0 ]
 then 
 	echo "Failed parsing options." >&2
