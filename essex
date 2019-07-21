@@ -50,9 +50,29 @@ list(){
 	done
 }
 
+# Update Essex
 update(){
 	echo "Updating Essex"
 	git --git-dir="$ESSEX_PATH"/.git pull origin
+}
+
+# Collect maintainer name from git
+maintainer(){
+	user_name="$(git config user.name)"
+	email="$(git config user.email)"
+	echo "$user_name <$email>"
+}
+
+# Update the project's maintainer
+project_maintainer(){
+	local maintainer="$1"
+	sed -i 's/org.opencontainers.image.authors=.* \\/org.opencontainers.image.authors="'"$maintainer"'" \\/g' Dockerfile
+}
+
+# Update the project's name
+project_name(){
+	local name="$1"
+	sed -r -i 's/(^IMAGE_NAME.+\?= ).+$/\1'"$name"'/g' Makefile
 }
 
 # Create a new project from a template
@@ -63,8 +83,20 @@ new(){
 	echo "Creating new project $project using template: $template"
 	mkdir -p "$project"
 	cd "$project" || exit 1
-	git init
-	cp -rv "$ESSEX_PATH"/templates/"$template"/* ./
+	# If this is not already a git project lets init one now
+	if [ ! -d ".git" ]
+	then
+		git init
+	fi
+
+	# Copy the template files into the project
+	cp -r "$ESSEX_PATH"/templates/"$template"/. ./
+
+	project_maintainer "$(maintainer)"
+	project_name "${project,,}"
+
+	git add .
+	# git status
 }
 
 # Parse any subcommands
