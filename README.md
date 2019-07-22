@@ -20,6 +20,8 @@ It will still require you to modify the Dockerfile and settings by hand just as 
 
 ## Installation
 
+**This has only been tested on Linux**
+
 To install Essex you can either clone this repository to any location on your machine and add it to your `$PATH`.
 Or you can install with the following:  
 ```shell

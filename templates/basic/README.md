@@ -1,20 +1,39 @@
-# Template
+# Basic
 
-[![Build Status](https://travis-ci.org/utensils/docker-template.svg?branch=master)](https://travis-ci.org/utensils/docker-template) [![Docker Automated build](https://img.shields.io/docker/automated/utensils/template.svg)](https://hub.docker.com/r/utensils/template/) [![Docker Pulls](https://img.shields.io/docker/pulls/utensils/template.svg)](https://hub.docker.com/r/utensils/template/) [![Docker Stars](https://img.shields.io/docker/stars/utensils/template.svg)](https://hub.docker.com/r/utensils/template/) [![](https://images.microbadger.com/badges/image/utensils/template.svg)](https://microbadger.com/images/utensils/template "Get your own image badge on microbadger.com") [![](https://images.microbadger.com/badges/version/utensils/template.svg)](https://microbadger.com/images/utensils/template "Get your own version badge on microbadger.com")  
+ [![Docker Automated build](https://img.shields.io/docker/automated/utensils/template.svg)](https://hub.docker.com/r/utensils/template/) [![Docker Pulls](https://img.shields.io/docker/pulls/utensils/template.svg)](https://hub.docker.com/r/utensils/template/)[![Docker Stars](https://img.shields.io/docker/stars/utensils/template.svg)](https://hub.docker.com/r/utensils/template/) [![](https://images.microbadger.com/badges/image/utensils/template.svg)](https://microbadger.com/images/utensils/template "Get your own image badge on microbadger.com") [![](https://images.microbadger.com/badges/version/utensils/template.svg)](https://microbadger.com/images/utensils/template "Get your own version badge on microbadger.com")  
 
 
 ## About
 
-This is a just a template.skeleton project for docker containers.
+This is basic boilerplate for a docker based project. 
+
+## Building
+
+To build the project:
+```shell
+make
+```
+
+To list the images:
+```shell
+make list
+```
+
+To run any tests:
+```shell
+make test
+```
+
+To cleanup and remove built images:
+```shell
+make clean
+```
 
 ## Usage
 
-Extending from this image. 
-
-```Dockerfile
-FROM utensils/template
-COPY ./MyApp /MyApp
-RUN apk add --update my-deps...
+To run the container:
+```shell
+docker run -i -t utensils/template
 ```
 
 

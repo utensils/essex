@@ -78,6 +78,8 @@ project_name(){
 	local name="$1"
 	sed -r -i 's/(^IMAGE_NAME.+\?= ).+$/\1'"${name,,}"'/g' Makefile
 	sed -i 's/org.opencontainers.image.title=.* \\/org.opencontainers.image.title="'"$name"'" \\/g' Dockerfile
+	sed -r -i 's/^# .*/# '"$name"'/g' README.md
+	sed -r -i 's|/template|/'"${name,,}"'|g' README.md
 }
 
 # Update the projects vendor
@@ -86,6 +88,7 @@ project_vendor(){
 	echo "Setting Vendor: $vendor"
 	sed -r -i 's/(^DOCKER_NAMESPACE.+\?= ).+$/\1'"${vendor,,}"'/g' Makefile
 	sed -i 's/org.opencontainers.image.vendor=.* \\/org.opencontainers.image.vendor="'"$vendor"'" \\/g' Dockerfile
+	sed -r -i 's|utensils|'"${vendor,,}"'|g' README.md
 }
 
 # Create a new project from a template
@@ -96,6 +99,7 @@ new(){
 	echo "Creating new project $project using template: $template"
 	mkdir -p "$project"
 	cd "$project" || exit 1
+
 	# If this is not already a git project lets init one now
 	if [ ! -d ".git" ]
 	then
