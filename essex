@@ -38,7 +38,8 @@ usage() {
 
 # Print version information
 version() {
-	git describe --tags --abbrev=0 2>/dev/null || git rev-parse --abbrev-ref HEAD
+	git --git-dir="$ESSEX_PATH"/.git describe --tags --abbrev=0 2>/dev/null \
+		|| git --git-dir="$ESSEX_PATH"/.git rev-parse --abbrev-ref HEAD
 }
 
 # List available templates
@@ -75,7 +76,7 @@ project_maintainer(){
 # Update the project's name
 project_name(){
 	local name="$1"
-	sed -r -i 's/(^IMAGE_NAME.+\?= ).+$/\1'"$name"'/g' Makefile
+	sed -r -i 's/(^IMAGE_NAME.+\?= ).+$/\1'"${name,,}"'/g' Makefile
 	sed -i 's/org.opencontainers.image.title=.* \\/org.opencontainers.image.title="'"$name"'" \\/g' Dockerfile
 }
 
@@ -83,7 +84,7 @@ project_name(){
 project_vendor(){
 	local vendor="$1"
 	echo "Setting Vendor: $vendor"
-	sed -r -i 's/(^DOCKER_NAMESPACE.+\?= ).+$/\1'"$vendor"'/g' Makefile
+	sed -r -i 's/(^DOCKER_NAMESPACE.+\?= ).+$/\1'"${vendor,,}"'/g' Makefile
 	sed -i 's/org.opencontainers.image.vendor=.* \\/org.opencontainers.image.vendor="'"$vendor"'" \\/g' Dockerfile
 }
 
@@ -105,7 +106,7 @@ new(){
 	cp -r "$ESSEX_PATH"/templates/"$template"/. ./
 
 	project_maintainer "$(maintainer)"
-	project_name "${project,,}"
+	project_name "$project"
 
 	git add .
 	# git status
