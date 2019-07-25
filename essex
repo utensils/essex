@@ -119,9 +119,15 @@ new(){
 	# Copy the template files into the project
 	cp -r "$ESSEX_PATH"/templates/"$template"/. ./
 
+	# Remove description file from project
+	rm .description
+
+	# Set the project maintainer
 	project_maintainer "$(maintainer)"
+	# Set the project name
 	project_name "$project"
 
+	# Add all files to new project
 	git add .
 	# git status
 }
