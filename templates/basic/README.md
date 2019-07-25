@@ -1,6 +1,6 @@
 # Basic
 
- [![Docker Automated build](https://img.shields.io/docker/automated/utensils/template.svg)](https://hub.docker.com/r/utensils/template/) [![Docker Pulls](https://img.shields.io/docker/pulls/utensils/template.svg)](https://hub.docker.com/r/utensils/template/)[![Docker Stars](https://img.shields.io/docker/stars/utensils/template.svg)](https://hub.docker.com/r/utensils/template/) [![](https://images.microbadger.com/badges/image/utensils/template.svg)](https://microbadger.com/images/utensils/template "Get your own image badge on microbadger.com") [![](https://images.microbadger.com/badges/version/utensils/template.svg)](https://microbadger.com/images/utensils/template "Get your own version badge on microbadger.com")  
+ [![Docker Automated build](https://img.shields.io/docker/automated/utensils/template.svg)](https://hub.docker.com/r/utensils/template/) [![Docker Pulls](https://img.shields.io/docker/pulls/utensils/template.svg)](https://hub.docker.com/r/utensils/template/) [![Docker Stars](https://img.shields.io/docker/stars/utensils/template.svg)](https://hub.docker.com/r/utensils/template/) [![](https://images.microbadger.com/badges/image/utensils/template.svg)](https://microbadger.com/images/utensils/template "Get your own image badge on microbadger.com") [![](https://images.microbadger.com/badges/version/utensils/template.svg)](https://microbadger.com/images/utensils/template "Get your own version badge on microbadger.com")  
 
 
 ## About
