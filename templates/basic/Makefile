@@ -35,6 +35,13 @@ list:
 test:
 	docker run -t $(DOCKER_NAMESPACE)/$(IMAGE_NAME) env | grep VERSION | grep $(VERSION)
 
+# Push images to repo
+.PHONY: push
+push:
+	docker push  $(DOCKER_NAMESPACE)/$(IMAGE_NAME):latest
+	docker push  $(DOCKER_NAMESPACE)/$(IMAGE_NAME):$(VCS_REF)
+	docker push  $(DOCKER_NAMESPACE)/$(IMAGE_NAME):$(VERSION)
+
 # Remove existing images
 .PHONY: clean
 clean:
