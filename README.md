@@ -45,7 +45,7 @@ Options:
 	-v, --vender [NAME]	Sets the vendor label
 Examples:
  	essex new basic utensils/MyApp
-	essex new basic utensils/MyApp --user jamesbrink
+	essex new basic utensils/MyApp --username jamesbrink
 	essex new basic jamesbrink/appname
 
 ```
