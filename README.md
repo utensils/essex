@@ -33,7 +33,7 @@ This will install essex into `~/.essex`.
 ## Usage
 
 See usage with `essex --help`
-```shell
+```text
  Essex master: Boilerplate for Docker Based Projects.
  License: MIT Copyright (c) 2019 Utensils Union
 
