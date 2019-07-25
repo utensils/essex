@@ -61,7 +61,7 @@ update(){
 	echo "Updating Essex"
 	cd "$ESSEX_PATH" || exit 1
 	git reset HEAD --hard
-	git pull origin
+	git pull origin || git reset HEAD origin/master --hard
 	exit $?
 }
 
