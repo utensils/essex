@@ -98,6 +98,14 @@ new(){
 	local template="$2"
 	local project="$3"
 
+	# Make sure the user passed in an active template
+	if [ ! -f "$ESSEX_PATH"/templates/"$template"/.description ]
+	then
+		echo "No template named: $template"
+		list
+		exit 1
+	fi
+
 	echo "Creating new project $project using template: $template"
 	mkdir -p "$project"
 	cd "$project" || exit 1
