@@ -24,6 +24,12 @@ To run any tests:
 make test
 ```
 
+To push image to remote docker repository:
+```shell
+docker login ....
+make push
+```
+
 To cleanup and remove built images:
 ```shell
 make clean

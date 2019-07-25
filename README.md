@@ -63,6 +63,8 @@ cd MyProject
 make
 make list
 make test
+make push
+make clean
 ```
 
 Update Essex:
