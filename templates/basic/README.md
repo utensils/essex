@@ -26,8 +26,13 @@ make test
 
 To push image to remote docker repository:
 ```shell
-docker login ....
-make push
+REPO_PASSWORD='MyPassword!$' make push
+```
+
+To update README on remote docker repository (docker hub):
+
+```shell
+REPO_PASSWORD='MyPassword!$' make push-readme
 ```
 
 To cleanup and remove built images:

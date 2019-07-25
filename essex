@@ -86,7 +86,8 @@ project_name(){
 project_vendor(){
 	local vendor="$1"
 	echo "Setting Vendor: $vendor"
-	sed -r -i 's/(^DOCKER_NAMESPACE.+\?= ).+$/\1'"${vendor,,}"'/g' Makefile
+	sed -r -i 's/(^REPO_NAMESPACE.+\?= ).+$/\1'"${vendor,,}"'/g' Makefile
+	sed -r -i 's/(^REPO_USERNAME.+\?= ).+$/\1'"${vendor,,}"'/g' Makefile
 	sed -i 's/org.opencontainers.image.vendor=.* \\/org.opencontainers.image.vendor="'"$vendor"'" \\/g' Dockerfile
 	sed -r -i 's|utensils|'"${vendor,,}"'|g' README.md
 	

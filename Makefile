@@ -1,7 +1,7 @@
 #!/usr/bin/make -f
 
 SHELL                   := /usr/bin/env bash
-DOCKER_NAMESPACE        ?= utensils
+REPO_NAMESPACE        ?= utensils
 TEMPLATES               := basic
 
 # Build the docker image
