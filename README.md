@@ -34,20 +34,19 @@ This will install essex into `~/.essex`.
 
 See usage with `essex --help`
 ```text
- Essex master: Boilerplate for Docker Based Projects.
- License: MIT Copyright (c) 2019 Utensils Union
-
- Usage:
- 	essex list
- 	essex new <template> <ProjectName> [OPTION]...
- 	essex update
-
- Options:
- 	-v, --vendor [NAME]		Sets the vendor name of the project.
-
- Examples:
-  	essex new basic MyApp
- 	essex new basic MyApp --vendor utensils
+Essex master: Boilerplate for Docker Based Projects.
+License: MIT Copyright (c) 2019 Utensils Union
+Usage:
+	essex list
+	essex new <template> <repo-path>/<image-name> [OPTION]...
+	essex update
+Options:
+	-u, --username [NAME]	Sets the repo username (your dockerhub username)
+	-v, --vender [NAME]	Sets the vendor label
+Examples:
+ 	essex new basic utensils/MyApp
+	essex new basic utensils/MyApp --user jamesbrink
+	essex new basic jamesbrink/appname
 
 ```
 

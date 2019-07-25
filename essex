@@ -22,15 +22,17 @@ usage() {
 		
 		 Usage:
 		 	essex list
-		 	essex new <template> <ProjectName> [OPTION]...
+		 	essex new <template> <repo-path>/<image-name> [OPTION]...
 		 	essex update
 
 		 Options:
-		 	-v, --vendor [NAME]		Sets the vendor name of the project.
+		 	-u, --username [NAME]	Sets the repo username (your dockerhub username)
+		 	-v, --vender [NAME]	Sets the vendor label
 
 		 Examples:
-		  	essex new basic MyApp
-		 	essex new basic MyApp --vendor utensils
+		  	essex new basic utensils/MyApp
+		 	essex new basic utensils/MyApp --user jamesbrink
+		 	essex new basic jamesbrink/appname
 
 		
 	EOF
@@ -82,22 +84,44 @@ project_name(){
 	sed -r -i 's|/template|/'"${name,,}"'|g' README.md
 }
 
-# Update the projects vendor
+# Update the projects repo path
+project_repo(){
+	local repo="$1"
+	echo "Setting Docker Repo: $repo"
+	sed -r -i 's|(^REPO_NAMESPACE.+\?= ).+$|\1'"${repo,,}"'|g' Makefile
+	# We set username here by default, if it is passed in as an option
+	# It will be updated by another function.
+	sed -r -i 's|(^REPO_USERNAME.+\?= ).+$|\1'"${repo,,}"'|g' Makefile
+	# We set vendor by default
+	sed -i 's|org.opencontainers.image.vendor=.* \\|org.opencontainers.image.vendor="'"$repo"'" \\|g' Dockerfile
+	sed -r -i 's|utensils|'"${repo,,}"'|g' README.md
+	
+	git add .
+}
+
+# Update the projects vendor label
 project_vendor(){
 	local vendor="$1"
 	echo "Setting Vendor: $vendor"
-	sed -r -i 's/(^REPO_NAMESPACE.+\?= ).+$/\1'"${vendor,,}"'/g' Makefile
-	sed -r -i 's/(^REPO_USERNAME.+\?= ).+$/\1'"${vendor,,}"'/g' Makefile
-	sed -i 's/org.opencontainers.image.vendor=.* \\/org.opencontainers.image.vendor="'"$vendor"'" \\/g' Dockerfile
-	sed -r -i 's|utensils|'"${vendor,,}"'|g' README.md
+	sed -i 's|org.opencontainers.image.vendor=.* \\|org.opencontainers.image.vendor="'"$vendor"'" \\|g' Dockerfile
 	
+	git add .
+}
+
+# Update the projects repo username
+project_username(){
+	local username="$1"
+	echo "Setting Repository Username: $username"
+	sed -r -i 's/(^REPO_USERNAME.+\?= ).+$/\1'"${username,,}"'/g' Makefile
+
 	git add .
 }
 
 # Create a new project from a template
 new(){
 	local template="$2"
-	local project="$3"
+	local repo_path=${3%/*}
+	local image_name=${3##*/}
 
 	# Make sure the user passed in an active template
 	if [ ! -f "$ESSEX_PATH"/templates/"$template"/.description ]
@@ -107,9 +131,23 @@ new(){
 		exit 1
 	fi
 
-	echo "Creating new project $project using template: $template"
-	mkdir -p "$project"
-	cd "$project" || exit 1
+	if [ -z "$repo_path" ]
+	then
+		echo "No docker repo path was specified"
+		usage
+		exit 1
+	fi
+
+	if [ -z "$image_name" ]
+	then
+		echo "No image name specified"
+		usage
+		exit 1
+	fi
+
+	echo "Creating new project $repo_path/$image_name using template: $template"
+	mkdir -p "$image_name"
+	cd "$image_name" || exit 1
 
 	# If this is not already a git project lets init one now
 	if [ ! -d ".git" ]
@@ -126,11 +164,12 @@ new(){
 	# Set the project maintainer
 	project_maintainer "$(maintainer)"
 	# Set the project name
-	project_name "$project"
+	project_name "$image_name"
+	# Set the repo_path/vendor
+	project_repo "$repo_path"
 
 	# Add all files to new project
 	git add .
-	# git status
 }
 
 # Parse any subcommands
@@ -144,7 +183,7 @@ while true; do
 done
 
 # Parse short and long options
-OPTS=$(getopt -o vh: --long vendor,help: -n 'parse-options' -- "$@")
+# options=$(getopt -o uvh: --long username,vendor,help: -n 'parse-options' -- "$@")
 
 # shellcheck disable=SC2181
 if [ $? != 0 ]
@@ -153,15 +192,27 @@ then
 	exit 1
 fi
 
-eval set -- "$OPTS"
+# eval set -- "$options"
 
 while true; do
   case "$1" in
-    -v | --vendor ) shift 2; project_vendor "$1" ;;
+  	-u | --username ) REPO_USERNAME="$2"; shift ;;
+	-v | --vendor ) VENDOR="$2"; shift ;;
     -h | --help ) usage;break;;
-    -- ) shift; break ;;
+    -* ) echo "Failed parsing options." >&2; exit 1; ;;
     * ) break ;;
   esac
+  shift
 done
+
+if [ -n "$REPO_USERNAME" ]
+then
+	project_username "$REPO_USERNAME"
+fi
+
+if [ -n "$VENDOR" ]
+then
+	project_vendor "$VENDOR"
+fi 
 
 exit 0
