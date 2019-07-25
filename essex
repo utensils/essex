@@ -59,8 +59,10 @@ list(){
 # Update Essex
 update(){
 	echo "Updating Essex"
-	git --git-dir="$ESSEX_PATH"/.git pull origin
-	git --git-dir="$ESSEX_PATH"/.git reset HEAD --hard
+	cd "$ESSEX_PATH" || exit 1
+	git reset HEAD --hard
+	git pull origin
+	exit $?
 }
 
 # Collect maintainer name from git
