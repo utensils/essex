@@ -42,7 +42,7 @@ Usage:
 	essex update
 Options:
 	-u, --username [NAME]	Sets the repo username (your dockerhub username)
-	-v, --vender [NAME]	Sets the vendor label
+	-v, --vendor [NAME]	Sets the vendor label
 Examples:
  	essex new basic utensils/MyApp
 	essex new basic utensils/MyApp --username jamesbrink
@@ -52,7 +52,7 @@ Examples:
 
 Create a new project using a template:
 ```shell
-essex new basic MyProject --vendor MyCompany
+essex new basic jamesbrink/MyProject
 ```  
 
 With this new project in place you can start using the project instantly.

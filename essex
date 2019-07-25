@@ -27,7 +27,7 @@ usage() {
 
 		 Options:
 		 	-u, --username [NAME]	Sets the repo username (your dockerhub username)
-		 	-v, --vender [NAME]	Sets the vendor label
+		 	-v, --vendor [NAME]	Sets the vendor label
 
 		 Examples:
 		  	essex new basic utensils/MyApp
