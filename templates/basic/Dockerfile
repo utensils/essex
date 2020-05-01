@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=alpine:latest
+ARG BASE_IMAGE=alpine:3.11
 FROM ${BASE_IMAGE}
 
 # Install deps.

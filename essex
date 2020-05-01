@@ -14,6 +14,9 @@ tan=$(tput setaf 3)
 blue=$(tput setaf 38)
 underline=$(tput sgr 0 1)
 
+# Use gsed (macOS)
+sed="$([[ `command -v gsed` ]] && echo gsed || echo sed)"
+
 # Print usage information
 usage() {
 	cat <<-EOF
@@ -75,29 +78,29 @@ maintainer(){
 # Update the project's maintainer
 project_maintainer(){
 	local maintainer="$1"
-	sed -i 's/org.opencontainers.image.authors=.* \\/org.opencontainers.image.authors="'"$maintainer"'" \\/g' Dockerfile
+	$sed -i 's/org.opencontainers.image.authors=.* \\/org.opencontainers.image.authors="'"$maintainer"'" \\/g' Dockerfile
 }
 
 # Update the project's name
 project_name(){
 	local name="$1"
-	sed -r -i 's/(^IMAGE_NAME.+\?= ).+$/\1'"${name,,}"'/g' Makefile
-	sed -i 's/org.opencontainers.image.title=.* \\/org.opencontainers.image.title="'"$name"'" \\/g' Dockerfile
-	sed -r -i 's/^# .*/# '"$name"'/g' README.md
-	sed -r -i 's|/template|/'"${name,,}"'|g' README.md
+	$sed -r -i 's/(^IMAGE_NAME.+\?= ).+$/\1'"${name,,}"'/g' Makefile
+	$sed -i 's/org.opencontainers.image.title=.* \\/org.opencontainers.image.title="'"$name"'" \\/g' Dockerfile
+	$sed -r -i 's/^# .*/# '"$name"'/g' README.md
+	$sed -r -i 's|/template|/'"${name,,}"'|g' README.md
 }
 
 # Update the projects repo path
 project_repo(){
 	local repo="$1"
 	echo "Setting Docker Repo: $repo"
-	sed -r -i 's|(^REPO_NAMESPACE.+\?= ).+$|\1'"${repo,,}"'|g' Makefile
+	$sed -r -i 's|(^REPO_NAMESPACE.+\?= ).+$|\1'"${repo,,}"'|g' Makefile
 	# We set username here by default, if it is passed in as an option
 	# It will be updated by another function.
-	sed -r -i 's|(^REPO_USERNAME.+\?= ).+$|\1'"${repo,,}"'|g' Makefile
+	$sed -r -i 's|(^REPO_USERNAME.+\?= ).+$|\1'"${repo,,}"'|g' Makefile
 	# We set vendor by default
-	sed -i 's|org.opencontainers.image.vendor=.* \\|org.opencontainers.image.vendor="'"$repo"'" \\|g' Dockerfile
-	sed -r -i 's|utensils|'"${repo,,}"'|g' README.md
+	$sed -i 's|org.opencontainers.image.vendor=.* \\|org.opencontainers.image.vendor="'"$repo"'" \\|g' Dockerfile
+	$sed -r -i 's|utensils|'"${repo,,}"'|g' README.md
 	
 	git add .
 }
@@ -106,7 +109,7 @@ project_repo(){
 project_vendor(){
 	local vendor="$1"
 	echo "Setting Vendor: $vendor"
-	sed -i 's|org.opencontainers.image.vendor=.* \\|org.opencontainers.image.vendor="'"$vendor"'" \\|g' Dockerfile
+	$sed -i 's|org.opencontainers.image.vendor=.* \\|org.opencontainers.image.vendor="'"$vendor"'" \\|g' Dockerfile
 	
 	git add .
 }
@@ -115,7 +118,7 @@ project_vendor(){
 project_username(){
 	local username="$1"
 	echo "Setting Repository Username: $username"
-	sed -r -i 's/(^REPO_USERNAME.+\?= ).+$/\1'"${username,,}"'/g' Makefile
+	$sed -r -i 's/(^REPO_USERNAME.+\?= ).+$/\1'"${username,,}"'/g' Makefile
 
 	git add .
 }
