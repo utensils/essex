@@ -1,18 +1,18 @@
-name: Build Release Binaries
+name: Build and Test
 
 on:
   push:
-    branches: [ "main" ]
-    tags: [ "v*" ]
+    branches: [ "**" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "**" ]
 
 env:
   CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
 
 jobs:
-  build:
-    name: Build ${{ matrix.target }}
+  build-and-test:
+    name: Build and Test ${{ matrix.target }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -48,8 +48,10 @@ jobs:
         sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
 
     - name: Build
-      run: |
-        cargo build --release --target ${{ matrix.target }}
+      run: cargo build --release --target ${{ matrix.target }}
+
+    - name: Run tests
+      run: cargo test --target ${{ matrix.target }} -- --nocapture
 
     - name: Prepare artifact
       shell: bash
@@ -78,8 +80,8 @@ jobs:
   # Create GitHub release when a tag is pushed
   release:
     name: Create Release
-    needs: build
-    if: startsWith(github.ref, 'refs/tags/')
+    needs: build-and-test
+    if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     permissions:
       contents: write
