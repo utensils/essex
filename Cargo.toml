@@ -1,0 +1,21 @@
+[package]
+name = "essex"
+version = "0.1.0"
+edition = "2021"
+authors = ["James Brink <brink.james@gmail.com>"]
+description = "A Docker project template generator"
+license = "MIT"
+
+[dependencies]
+clap = { version = "4.4", features = ["derive"] }
+tera = "1.19"
+anyhow = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+thiserror = "1.0"
+chrono = "0.4"
+
+[dev-dependencies]
+assert_fs = "1.0"
+predicates = "3.0"
+assert_cmd = "2.0"

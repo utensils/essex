@@ -1,73 +1,75 @@
-# Essex - Boilerplate for Docker Based Projects
+# Essex Boilerplate for Docker Based Projects
 
-## About
+A Docker project template generator that helps create consistent and well-structured Docker projects.
 
-Project is still under active development and may not work as expected.  
-**Pull requests always welcome**
+## Features
 
-Essex is a CLI utility written in bash to quickly setup consistent and clean Docker projects.
-
-## Goals
-
- * Allow easy creation of Dockerfiles using good/best practices
- * Use a `Makefile` driven workflow for image builds
- * Maintain consistency between projects that use Docker
- * All images will have valid Labels/Annotations. See the Open Container Initiative [image-spec](https://github.com/opencontainers/image-spec/blob/master/annotations.md)  
-
-
-This tool is intended to just lay down a starting point for each project. 
-It will still require you to modify the Dockerfile and settings by hand just as you would any other Docker based project.
+- Generate Docker projects from templates
+- Consistent project structure with best practices
+- Makefile-driven workflow
+- OCI-compliant labels
+- Templates using Tera (Jinja2-like syntax)
 
 ## Installation
 
-**This has only been tested on Linux**
+### From Source
 
-To install Essex you can either clone this repository to any location on your machine and add it to your `$PATH`.
-Or you can install with the following:  
-```shell
-\curl -sSL  https://raw.githubusercontent.com/utensils/essex/master/install.sh | bash -s
+```bash
+cargo install --path .
 ```
-
-This will install essex into `~/.essex`.
 
 ## Usage
 
-See usage with `essex --help`
-```text
-Essex master: Boilerplate for Docker Based Projects.
-License: MIT Copyright (c) 2019 Utensils Union
-Usage:
-	essex list
-	essex new <template> <repo-path>/<image-name> [OPTION]...
-	essex update
-Options:
-	-u, --username [NAME]	Sets the repo username (your dockerhub username)
-	-v, --vendor [NAME]	Sets the vendor label
-Examples:
- 	essex new basic utensils/MyApp
-	essex new basic utensils/MyApp --username jamesbrink
-	essex new basic jamesbrink/appname
+```bash
+# List available templates
+essex list
 
+# Create a new project
+essex new basic namespace/project-name --username your-username --vendor "Your Company"
 ```
 
-Create a new project using a template:
-```shell
-essex new basic jamesbrink/MyProject
-```  
+### Template Structure
 
-With this new project in place you can start using the project instantly.
-This project is pre-wired up with useful Make targets.
-```shell
-cd MyProject
-make
-make list
-make test
-make push
-make clean
+The basic template includes:
+- Dockerfile with best practices
+- Makefile for common Docker operations
+- README.md
+- Entrypoint script
+- OCI-compliant labels
+
+### Project Structure
+
+```
+project-name/
+├── Dockerfile
+├── Makefile
+├── README.md
+└── runtime-assets/
+    └── usr/
+        └── local/
+            └── bin/
+                └── entrypoint.sh
 ```
 
-Update Essex:
-```shell
-essex update
+## Development
+
+### Requirements
+
+- Rust 1.70 or later
+- Cargo
+
+### Building
+
+```bash
+cargo build --release
 ```
 
+### Testing
+
+```bash
+cargo test
+```
+
+## License
+
+MIT License
