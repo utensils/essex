@@ -86,7 +86,7 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
-        name: essex-${{ matrix.target }}
+        name: binaries
         path: essex-${{ matrix.target }}.${{ matrix.os == 'windows-latest' && 'zip' || 'tar.gz' }}
         retention-days: 5
 
@@ -103,17 +103,20 @@ jobs:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
+          name: binaries
           path: dist
           
       - name: List artifacts
-        run: ls -R dist/
+        run: |
+          pwd
+          find dist -type f -ls
         
       - name: Create Release
         uses: softprops/action-gh-release@v2.1.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          files: dist/**/*.{tar.gz,zip}
+          files: dist/*
           generate_release_notes: true
           draft: false
           prerelease: false
