@@ -7,14 +7,25 @@ on:
   pull_request:
     branches: [ "**" ]
 
+# Prevent multiple workflows from running simultaneously on the same ref
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   CARGO_TERM_COLOR: always
   RUST_BACKTRACE: 1
+  CARGO_NET_RETRY: 2
+
+# Limit permissions to only what's needed
+permissions:
+  contents: read
 
 jobs:
   build-and-test:
     name: Build and Test ${{ matrix.target }}
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
@@ -39,18 +50,30 @@ jobs:
             use_cross: true
 
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
-    - name: Install Rust
+    - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
       with:
         targets: ${{ matrix.target }}
 
-    - name: Install cross
+    - name: Cache Rust dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          target
+        key: ${{ runner.os }}-cargo-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-cargo-${{ matrix.target }}-
+
+    - name: Install cross (if needed)
       if: matrix.use_cross
       run: cargo install cross
 
-    - name: Build
+    - name: Build binary
       run: |
         if [ "${{ matrix.use_cross }}" = "true" ]; then
           cross build --release --target ${{ matrix.target }}
@@ -66,7 +89,7 @@ jobs:
           cargo test --target ${{ matrix.target }} -- --nocapture
         fi
 
-    - name: Prepare artifact
+    - name: Prepare release artifact
       shell: bash
       run: |
         mkdir -p artifacts
@@ -83,7 +106,7 @@ jobs:
         fi
         cd ..
 
-    - name: Upload artifact
+    - name: Upload build artifact
       uses: actions/upload-artifact@v4
       with:
         name: binaries
@@ -95,23 +118,25 @@ jobs:
     needs: build-and-test
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
       
-      - name: Download all artifacts
+      - name: Download release artifacts
         uses: actions/download-artifact@v4
         with:
           name: binaries
           path: dist
           
-      - name: List artifacts
+      - name: List release artifacts
         run: |
           pwd
           find dist -type f -ls
         
-      - name: Create Release
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v2.1.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
