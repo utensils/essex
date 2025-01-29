@@ -1,15 +1,15 @@
 #!/usr/bin/make -f
 
 SHELL                   := /usr/bin/env bash
-REPO_NAMESPACE          ?= utensils
-REPO_USERNAME           ?= jamesbrink
-REPO_API_URL            ?= https://hub.docker.com/v2
-IMAGE_NAME              ?= essex-basic
-BASE_IMAGE              ?= alpine:3.11
-SED                     := $(shell [[ `command -v gsed` ]] && echo gsed || echo sed)
-VERSION                 := $(shell git describe --tags --abbrev=0 2>/dev/null || git rev-parse --abbrev-ref HEAD | $(SED) 's|/|_|g' 2>/dev/null)
-VCS_REF                 := $(shell git rev-parse --short HEAD 2>/dev/null || echo "0000000")
-BUILD_DATE              := $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
+REPO_NAMESPACE         ?= {{ repo_namespace }}
+REPO_USERNAME         ?= {{ repo_username }}
+REPO_API_URL          ?= https://hub.docker.com/v2
+IMAGE_NAME            ?= {{ image_name }}
+BASE_IMAGE            ?= alpine:3.11
+SED                   := $(shell [[ `command -v gsed` ]] && echo gsed || echo sed)
+VERSION              := $(shell git describe --tags --abbrev=0 2>/dev/null || git rev-parse --abbrev-ref HEAD | $(SED) 's|/|_|g' 2>/dev/null)
+VCS_REF              := $(shell git rev-parse --short HEAD 2>/dev/null || echo "0000000")
+BUILD_DATE           := $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 
 # Default target is to build container
 .PHONY: default
@@ -63,4 +63,4 @@ push-readme:
 # Remove existing images
 .PHONY: clean
 clean:
-	docker rmi $$(docker images $(REPO_NAMESPACE)/$(IMAGE_NAME) --format="{{.Repository}}:{{.Tag}}") --force
+	docker rmi $$(docker images $(REPO_NAMESPACE)/$(IMAGE_NAME) --format="{%raw%}{{.Repository}}:{{.Tag}}{%endraw%}") --force

@@ -1,3 +1,30 @@
-DS_Store
-NOTES.md
-tmp
+# Rust specific
+/target/
+**/*.rs.bk
+Cargo.lock
+
+# IDE specific
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Test artifacts
+test/
+test2/
+
+# Generated files
+*.pdb
+
+# Local development
+.env
+.goose/
+
+# Documentation
+/doc/
+/target/doc/
+
+# Coverage reports
+coverage/
+*.profraw

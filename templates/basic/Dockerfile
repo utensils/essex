@@ -22,19 +22,19 @@ ARG VERSION
 
 # Labels / Metadata.
 LABEL \
-    org.opencontainers.image.authors="James Brink <brink.james@gmail.com>" \
-    org.opencontainers.image.created="${BUILD_DATE}" \
-    org.opencontainers.image.description="Essex basic image example" \
-    org.opencontainers.image.revision="${VCS_REF}" \
-    org.opencontainers.image.source="https://github.com/utensils/essex" \
-    org.opencontainers.image.title="essex-basic" \
-    org.opencontainers.image.vendor="Utensils" \
-    org.opencontainers.image.version="${VERSION}"
+    org.opencontainers.image.authors="{{ repo_username }} <contact@example.com>" \
+    org.opencontainers.image.created="{{ build_date }}" \
+    org.opencontainers.image.description="{{ image_name }} description" \
+    org.opencontainers.image.revision="{{ vcs_ref }}" \
+    org.opencontainers.image.source="https://github.com/{{ repo_namespace }}/{{ image_name }}" \
+    org.opencontainers.image.title="{{ image_name }}" \
+    org.opencontainers.image.vendor="{{ vendor }}" \
+    org.opencontainers.image.version="{{ version }}"
 
 # Setup our environment variables.
 ENV \
     PATH="/usr/local/bin:$PATH" \
-    VERSION="${VERSION}"
+    VERSION="{{ version }}"
 
 # Drop down to our unprivileged user.
 USER essex
