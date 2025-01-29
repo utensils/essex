@@ -3,6 +3,7 @@ name: Build and Test
 on:
   push:
     branches: [ "**" ]
+    tags: [ "v*" ]
   pull_request:
     branches: [ "**" ]
 
@@ -89,7 +90,6 @@ jobs:
         path: essex-${{ matrix.target }}.${{ matrix.os == 'windows-latest' && 'zip' || 'tar.gz' }}
         retention-days: 5
 
-  # Create GitHub release when a tag is pushed
   release:
     name: Create Release
     needs: build-and-test
@@ -99,21 +99,21 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
-
+      
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
-          path: artifacts
-
+          path: dist
+          
       - name: List artifacts
-        run: ls -R artifacts/
-
+        run: ls -R dist/
+        
       - name: Create Release
         uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          files: |
-            artifacts/essex-*/*.tar.gz
-            artifacts/essex-*/*.zip
+          files: dist/**/*.{tar.gz,zip}
           generate_release_notes: true
           draft: false
           prerelease: false
