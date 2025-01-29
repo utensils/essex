@@ -102,11 +102,18 @@ jobs:
 
       - name: Download all artifacts
         uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: List artifacts
+        run: ls -R artifacts/
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          files: essex-*/*
+          files: |
+            artifacts/essex-*/*.tar.gz
+            artifacts/essex-*/*.zip
           generate_release_notes: true
           draft: false
           prerelease: false
