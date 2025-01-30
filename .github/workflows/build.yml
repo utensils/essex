@@ -53,12 +53,14 @@ jobs:
 
     - name: Configure Git
       run: |
+        # Set global git config
         git config --global user.email "ci@example.com"
         git config --global user.name "CI User"
         git config --global init.defaultBranch main
-        # Ensure git configs are available in cross environment
-        mkdir -p ~/.cargo/git
-        git config --global --add safe.directory "*"
+        # For cross environment
+        git config --system core.longpaths true
+        git config --system user.email "ci@example.com"
+        git config --system user.name "CI User"
 
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable

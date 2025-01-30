@@ -34,17 +34,6 @@ fn setup_test_project() -> (TempDir, PathBuf) {
         project_dir
     );
 
-    // Setup git configuration
-    StdCommand::new("git")
-        .args(["config", "--global", "user.email", "test@example.com"])
-        .output()
-        .expect("Failed to set git email");
-    
-    StdCommand::new("git")
-        .args(["config", "--global", "user.name", "Test User"])
-        .output()
-        .expect("Failed to set git name");
-
     // Initialize git repository
     let git_init = StdCommand::new("git")
         .args(["init"])
@@ -57,6 +46,19 @@ fn setup_test_project() -> (TempDir, PathBuf) {
         "Git init failed: {}",
         String::from_utf8_lossy(&git_init.stderr)
     );
+
+    // Setup git configuration locally
+    StdCommand::new("git")
+        .args(["config", "--local", "user.email", "test@example.com"])
+        .current_dir(&project_dir)
+        .output()
+        .expect("Failed to set git email");
+    
+    StdCommand::new("git")
+        .args(["config", "--local", "user.name", "Test User"])
+        .current_dir(&project_dir)
+        .output()
+        .expect("Failed to set git name");
 
     // Add files to git
     let git_add = StdCommand::new("git")
