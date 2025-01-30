@@ -10,8 +10,7 @@ use template::{TemplateEngine, TemplateContext};
 
 fn main() -> Result<()> {
     let cli = Cli::parse();
-    let templates_dir = PathBuf::from("templates");
-    let mut engine = TemplateEngine::new(templates_dir)?;
+    let mut engine = TemplateEngine::new(".")?;
 
     match cli.command {
         Commands::List => {
@@ -38,4 +37,17 @@ fn main() -> Result<()> {
     }
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_template_embedding() {
+        let engine = TemplateEngine::new(".").unwrap();
+        let templates = engine.list_templates().unwrap();
+        assert!(!templates.is_empty(), "Should find at least one template");
+        assert!(templates.contains(&"basic".to_string()), "Should find basic template");
+    }
 }
