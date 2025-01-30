@@ -140,6 +140,9 @@ jobs:
           path: dist
           merge-multiple: true
           
+      - name: Copy download script
+        run: cp download_cli.sh dist/
+          
       - name: List artifacts
         run: ls -la dist/
         

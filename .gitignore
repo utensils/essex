@@ -32,3 +32,6 @@ limit.log
 # Coverage reports
 coverage/
 *.profraw
+
+# Act artifacts
+.act
