@@ -13,6 +13,28 @@ A Docker project template generator that helps create consistent and well-struct
 
 ## Installation
 
+### Quick Install (Linux and macOS)
+
+```bash
+curl -fsSL https://github.com/utensils/essex/releases/latest/download/download_cli.sh | bash
+```
+
+This script will:
+- Detect your OS and architecture
+- Download the appropriate binary
+- Install it to `~/.local/bin`
+- Provide instructions for adding to your PATH
+
+The installer supports:
+- macOS (Apple Silicon and Intel)
+- Linux (x86_64 and ARM64)
+
+Note: You may need to add `~/.local/bin` to your PATH if you haven't already:
+```bash
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc  # or restart your terminal
+```
+
 ### From Source
 
 ```bash
@@ -127,7 +149,8 @@ cargo build --release
 ### Testing
 
 ```bash
-cargo test
+cargo test                # Run Rust tests
+./test_install.sh        # Run installer tests
 ```
 
 ## License

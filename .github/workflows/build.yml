@@ -51,6 +51,10 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
+    - name: Set up Docker Buildx
+      if: runner.os == 'Linux'
+      uses: docker/setup-buildx-action@v3
+
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
       with:
