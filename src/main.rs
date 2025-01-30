@@ -22,16 +22,23 @@ fn main() -> Result<()> {
         }
         Commands::New { template, project, username, vendor } => {
             let context = TemplateContext::new(&project, username, vendor)?;
-            let output_dir = PathBuf::from(&project);
+            let parts: Vec<&str> = project.split('/').collect();
+            if parts.len() != 2 {
+                return Err(EssexError::InvalidProjectName(project));
+            }
             
-            if output_dir.exists() {
+            // Create project directory inside a directory named after the namespace
+            let namespace_dir = PathBuf::from(parts[0]);
+            let project_dir = namespace_dir.join(parts[1]);
+            
+            if project_dir.exists() {
                 return Err(EssexError::ProjectDirectoryError(
-                    format!("Directory '{}' already exists", project)
+                    format!("Directory '{}' already exists", project_dir.display())
                 ));
             }
 
             println!("Creating new project '{}' using template '{}'", project, template);
-            engine.generate(&template, context, &output_dir)?;
+            engine.generate(&template, context, &project_dir)?;
             println!("Project created successfully!");
         }
     }

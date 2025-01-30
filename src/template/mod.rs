@@ -111,7 +111,16 @@ impl TemplateEngine {
                     EssexError::TemplateNotFound(entry.path().to_string_lossy().to_string())
                 })?;
                 let rendered = self.tera.render_str(content, context)?;
-                std::fs::write(target, rendered)?;
+                std::fs::write(&target, rendered)?;
+
+                // Set executable permissions for shell scripts
+                #[cfg(unix)]
+                if entry.path().extension().map_or(false, |ext| ext == "sh") {
+                    use std::os::unix::fs::PermissionsExt;
+                    let mut perms = std::fs::metadata(&target)?.permissions();
+                    perms.set_mode(0o755);
+                    std::fs::set_permissions(&target, perms)?;
+                }
             }
         }
 
