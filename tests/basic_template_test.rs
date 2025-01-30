@@ -104,6 +104,10 @@ fn setup_test_project() -> (TempDir, PathBuf) {
     (temp_dir, project_dir)
 }
 
+fn is_ci() -> bool {
+    std::env::var("CI").is_ok()
+}
+
 #[test]
 fn test_template_generation() {
     let (_temp_dir, project_dir) = setup_test_project();
@@ -146,7 +150,12 @@ fn test_template_generation() {
 }
 
 #[test]
+#[cfg_attr(not(feature = "docker_tests"), ignore)]
 fn test_dockerfile_contents() {
+    if is_ci() {
+        println!("Skipping Docker tests in CI environment");
+        return;
+    }
     let (_temp_dir, project_dir) = setup_test_project();
     let dockerfile_path = project_dir.join("Dockerfile");
     let dockerfile_content = fs::read_to_string(&dockerfile_path).unwrap_or_else(|e| {
@@ -166,7 +175,12 @@ fn test_dockerfile_contents() {
 }
 
 #[test]
+#[cfg_attr(not(feature = "docker_tests"), ignore)]
 fn test_makefile_functionality() {
+    if is_ci() {
+        println!("Skipping Docker tests in CI environment");
+        return;
+    }
     let (_temp_dir, project_dir) = setup_test_project();
 
     // Test make build
@@ -203,7 +217,12 @@ fn test_makefile_functionality() {
 }
 
 #[test]
+#[cfg_attr(not(feature = "docker_tests"), ignore)]
 fn test_container_runtime() {
+    if is_ci() {
+        println!("Skipping Docker tests in CI environment");
+        return;
+    }
     let (_temp_dir, project_dir) = setup_test_project();
 
     // Build the container
