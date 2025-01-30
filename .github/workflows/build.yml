@@ -79,6 +79,11 @@ jobs:
           cargo build --release --target ${{ matrix.target }}
         fi
 
+    - name: Configure Git
+      run: |
+        git config --global user.email "ci@example.com"
+        git config --global user.name "CI User"
+
     - name: Run tests
       run: |
         if [ "${{ matrix.use_cross }}" = "true" ]; then
