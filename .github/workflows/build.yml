@@ -7,7 +7,6 @@ on:
   pull_request:
     branches: [ "**" ]
 
-# Prevent multiple workflows from running simultaneously on the same ref
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -17,7 +16,6 @@ env:
   RUST_BACKTRACE: 1
   CARGO_NET_RETRY: 2
 
-# Limit permissions to only what's needed
 permissions:
   contents: read
 
@@ -89,27 +87,21 @@ jobs:
           cargo test --target ${{ matrix.target }} -- --nocapture
         fi
 
-    - name: Prepare release artifact
+    - name: Package binary
       shell: bash
       run: |
-        mkdir -p artifacts
+        cd target/${{ matrix.target }}/release
         if [ "${{ matrix.os }}" = "windows-latest" ]; then
-          cp target/${{ matrix.target }}/release/${{ matrix.binary_name }}.exe artifacts/
+          zip ../../../essex-${{ matrix.target }}.zip ${{ matrix.binary_name }}.exe
         else
-          cp target/${{ matrix.target }}/release/${{ matrix.binary_name }} artifacts/
+          tar czf ../../../essex-${{ matrix.target }}.tar.gz ${{ matrix.binary_name }}
         fi
-        cd artifacts
-        if [ "${{ matrix.os }}" = "windows-latest" ]; then
-          7z a ../essex-${{ matrix.target }}.zip ${{ matrix.binary_name }}.exe
-        else
-          tar czf ../essex-${{ matrix.target }}.tar.gz ${{ matrix.binary_name }}
-        fi
-        cd ..
+        cd -
 
-    - name: Upload build artifact
+    - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
-        name: binaries
+        name: essex-${{ matrix.target }}
         path: essex-${{ matrix.target }}.${{ matrix.os == 'windows-latest' && 'zip' || 'tar.gz' }}
         retention-days: 5
 
@@ -125,16 +117,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       
-      - name: Download release artifacts
+      - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
-          name: binaries
           path: dist
+          merge-multiple: true
           
-      - name: List release artifacts
-        run: |
-          pwd
-          find dist -type f -ls
+      - name: List artifacts
+        run: ls -la dist/
         
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2.1.0
