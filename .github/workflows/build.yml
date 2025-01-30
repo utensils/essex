@@ -51,6 +51,15 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
+    - name: Configure Git
+      run: |
+        git config --global user.email "ci@example.com"
+        git config --global user.name "CI User"
+        git config --global init.defaultBranch main
+        # Ensure git configs are available in cross environment
+        mkdir -p ~/.cargo/git
+        git config --global --add safe.directory "*"
+
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
       with:
@@ -79,12 +88,9 @@ jobs:
           cargo build --release --target ${{ matrix.target }}
         fi
 
-    - name: Configure Git
-      run: |
-        git config --global user.email "ci@example.com"
-        git config --global user.name "CI User"
-
     - name: Run tests
+      env:
+        RUST_BACKTRACE: 1
       run: |
         if [ "${{ matrix.use_cross }}" = "true" ]; then
           cross test --target ${{ matrix.target }} -- --nocapture
