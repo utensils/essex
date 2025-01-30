@@ -52,8 +52,16 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Set up Docker Buildx
-      if: runner.os == 'Linux'
       uses: docker/setup-buildx-action@v3
+      with:
+        install: true
+
+    - name: Set up Docker for macOS
+      if: runner.os == 'macOS'
+      run: |
+        brew install docker
+        colima start
+        sudo ln -sf $HOME/.colima/default/docker.sock /var/run/docker.sock
 
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
