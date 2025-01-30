@@ -7,7 +7,8 @@ description = "A Docker project template generator"
 license = "MIT"
 
 [dependencies]
-clap = { version = "4.4", features = ["derive"] }
+clap = { version = "4.4", features = ["derive", "env"] }
+clap_complete = "4.4"
 tera = "1.19"
 anyhow = "1.0"
 serde = { version = "1.0", features = ["derive"] }

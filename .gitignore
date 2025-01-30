@@ -21,6 +21,10 @@ test2/
 .env
 .goose/
 
+# Local scripts
+slow.sh
+limit.log
+
 # Documentation
 /doc/
 /target/doc/
