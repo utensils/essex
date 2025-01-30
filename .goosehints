@@ -1,0 +1,69 @@
+This is Essex, a Docker project template generator written in Rust. It helps create consistent and well-structured Docker projects.
+
+# Project Context
+- Essex is designed to generate Docker projects from templates with a focus on best practices and consistency
+- The project uses Tera templating (Jinja2-like syntax) for template generation
+- The main binary is written in Rust and requires Rust 1.70 or later
+
+# Project Structure
+- `/src`: Contains the Rust source code for the Essex binary
+- `/templates`: Contains the template definitions
+  - `/templates/basic`: The basic template which includes Dockerfile, Makefile, README.md, and runtime assets
+- Each generated project follows a consistent structure with:
+  - Dockerfile (uses best practices and OCI-compliant labels)
+  - Makefile (for common Docker operations)
+  - README.md
+  - runtime-assets (containing entrypoint scripts and other assets)
+
+# Development Guidelines
+- Follow Test-Driven Development (TDD) practices:
+  - Write tests first before implementing new features
+  - Ensure each new feature or bug fix has corresponding tests
+  - Keep test coverage high and meaningful
+- All code changes should maintain backward compatibility with existing templates
+- Follow Rust best practices and idiomatic code patterns
+- Ensure all templates follow Docker best practices:
+  - Use multi-stage builds where appropriate
+  - Include proper OCI labels
+  - Follow principle of least privilege (run as non-root user)
+  - Include proper documentation
+
+# Testing Requirements
+- Run `cargo test` to ensure all tests pass before submitting changes
+- Test template generation with different parameters
+- Verify generated Dockerfiles can be built successfully
+- Check that Makefiles in templates work as expected
+
+# Important Files
+- README.md: Primary documentation source
+- src/main.rs: Entry point for the Essex binary
+- templates/basic/*: Core template files that serve as examples
+
+# Build Process
+- Use `cargo build --release` for production builds
+- Development builds can use `cargo build`
+- Generated projects use Make for building Docker images
+
+# Template Variables
+The following variables are commonly used in templates:
+- repo_username: GitHub/container registry username
+- repo_namespace: Organization/namespace for the project
+- image_name: Name of the Docker image
+- vendor: Company/organization name
+- version: Project version
+- build_date: Build timestamp
+- vcs_ref: Git commit reference
+
+# Best Practices
+- Keep templates minimal but functional
+- Ensure all generated projects include proper documentation
+- Follow security best practices in Dockerfile templates
+- Include comprehensive error handling in Rust code
+- Document any new template variables or features
+
+When working with this project, please:
+1. Consult the README.md first for basic information
+2. Run tests before making any changes
+3. Maintain the existing project structure
+4. Follow the established coding style and practices
+5. Update documentation when adding new features
