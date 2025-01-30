@@ -4,6 +4,32 @@ use std::path::PathBuf;
 use std::process::Command as StdCommand;
 use tempfile::TempDir;
 
+fn setup_git_config(project_dir: &PathBuf) {
+    // Try local config first
+    if let Err(_) = StdCommand::new("git")
+        .args(["config", "--local", "user.email", "test@example.com"])
+        .current_dir(project_dir)
+        .output()
+    {
+        // Fallback to global config if local fails
+        StdCommand::new("git")
+            .args(["config", "--global", "user.email", "test@example.com"])
+            .output()
+            .expect("Failed to set git email");
+        
+        StdCommand::new("git")
+            .args(["config", "--global", "user.name", "Test User"])
+            .output()
+            .expect("Failed to set git name");
+    } else {
+        StdCommand::new("git")
+            .args(["config", "--local", "user.name", "Test User"])
+            .current_dir(project_dir)
+            .output()
+            .expect("Failed to set git name");
+    }
+}
+
 fn setup_test_project() -> (TempDir, PathBuf) {
     let temp_dir = TempDir::new().unwrap();
     let output = Command::cargo_bin("essex")
@@ -47,18 +73,8 @@ fn setup_test_project() -> (TempDir, PathBuf) {
         String::from_utf8_lossy(&git_init.stderr)
     );
 
-    // Setup git configuration locally
-    StdCommand::new("git")
-        .args(["config", "--local", "user.email", "test@example.com"])
-        .current_dir(&project_dir)
-        .output()
-        .expect("Failed to set git email");
-    
-    StdCommand::new("git")
-        .args(["config", "--local", "user.name", "Test User"])
-        .current_dir(&project_dir)
-        .output()
-        .expect("Failed to set git name");
+    // Setup git configuration
+    setup_git_config(&project_dir);
 
     // Add files to git
     let git_add = StdCommand::new("git")
@@ -76,9 +92,10 @@ fn setup_test_project() -> (TempDir, PathBuf) {
     // Initial commit
     let git_commit = StdCommand::new("git")
         .args([
+            "-c", "user.email=test@example.com",
+            "-c", "user.name=Test User",
             "commit",
-            "-m", "Initial commit",
-            "--author", "Test User <test@example.com>"
+            "-m", "Initial commit"
         ])
         .current_dir(&project_dir)
         .output()
@@ -92,7 +109,13 @@ fn setup_test_project() -> (TempDir, PathBuf) {
 
     // Create an initial tag
     let git_tag = StdCommand::new("git")
-        .args(["tag", "-a", "v0.1.0", "-m", "Initial release"])
+        .args([
+            "-c", "user.email=test@example.com",
+            "-c", "user.name=Test User",
+            "tag",
+            "-a", "v0.1.0",
+            "-m", "Initial release"
+        ])
         .current_dir(&project_dir)
         .output()
         .expect("Failed to create git tag");

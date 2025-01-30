@@ -53,14 +53,18 @@ jobs:
 
     - name: Configure Git
       run: |
-        # Set global git config
+        # Set global git config in home directory
         git config --global user.email "ci@example.com"
         git config --global user.name "CI User"
         git config --global init.defaultBranch main
-        # For cross environment
-        git config --system core.longpaths true
-        git config --system user.email "ci@example.com"
-        git config --system user.name "CI User"
+        
+        # Create a git config template for cross environment
+        mkdir -p /tmp/git-template
+        git config -f /tmp/git-template/config user.email "ci@example.com"
+        git config -f /tmp/git-template/config user.name "CI User"
+        
+        # Set environment variable for tests to use the template
+        echo "GIT_CONFIG_GLOBAL=/tmp/git-template/config" >> $GITHUB_ENV
 
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
