@@ -157,7 +157,7 @@ fn test_dockerfile_contents() {
     });
 
     // Check for required Dockerfile elements
-    assert!(dockerfile_content.contains("ARG BASE_IMAGE=alpine:3.11"));
+    assert!(dockerfile_content.contains("ARG BASE_IMAGE=alpine:3.21"));
     assert!(dockerfile_content.contains("FROM ${BASE_IMAGE}"));
     assert!(dockerfile_content.contains("addgroup -g 1000 -S essex"));
     assert!(dockerfile_content.contains("adduser -u 1000 -S -h /essex"));
@@ -265,7 +265,7 @@ fn test_template_variable_substitution() {
         panic!("Failed to read Makefile at {:?}: {}", makefile_path, e)
     });
 
-    assert!(makefile_content.contains("REPO_NAMESPACE         ?= testuser"));
+    assert!(makefile_content.contains("REPO_NAMESPACE        ?= testuser"));
     assert!(makefile_content.contains("REPO_USERNAME         ?= testuser"));
     assert!(makefile_content.contains("IMAGE_NAME            ?= test-project"));
 
