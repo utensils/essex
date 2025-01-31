@@ -82,16 +82,24 @@ verify_checksum() {
     local expected_sha
     local computed_sha
     local checksum_file="${file}.sha256"
+    local remote_checksum="$2"
     
-    # Download checksum file if it doesn't exist
-    if [ ! -f "$checksum_file" ]; then
-        if ! curl -L --fail -o "$checksum_file" "${2}.sha256"; then
+    echo "Debug - Verifying checksum for file: $file"
+    echo "Debug - Checksum file: $checksum_file"
+    
+    # Download checksum file if it doesn't exist and remote checksum is provided
+    if [ ! -f "$checksum_file" ] && [ -n "$remote_checksum" ]; then
+        if ! curl -L --fail -o "$checksum_file" "${remote_checksum}.sha256"; then
             error "Failed to download checksum file"
             return 1
         fi
+    elif [ ! -f "$checksum_file" ]; then
+        error "Checksum file not found: $checksum_file"
+        return 1
     fi
     
-    expected_sha=$(cat "$checksum_file" | cut -d ' ' -f 1)
+    expected_sha=$(cut -d ' ' -f 1 < "$checksum_file")
+    echo "Debug - Expected SHA: $expected_sha"
     
     if command -v sha256sum >/dev/null 2>&1; then
         computed_sha=$(sha256sum "$file" | cut -d ' ' -f 1)
@@ -102,9 +110,12 @@ verify_checksum() {
         return 1
     fi
     
+    echo "Debug - Computed SHA: $computed_sha"
+    echo "Debug - File contents:"
+    cat "$file" | xxd
+    
     if [ "$computed_sha" != "$expected_sha" ]; then
         error "Checksum verification failed"
-        rm -f "$file" "$checksum_file"
         return 1
     fi
     return 0

@@ -114,17 +114,26 @@ test_version_fetching() {
 # Test checksum verification
 test_checksum_verification() {
     echo "Testing checksum verification..."
-    local temp_file
-    temp_file=$(mktemp)
-    echo "test" > "$temp_file"
+    local temp_dir
+    temp_dir=$(mktemp -d)
+    cd "$temp_dir" || exit 1
     
-    # Known SHA256 of "test\n"
-    local test_sha="f2ca1bb6c7e907d06dafe4687e579fce76b37e4e93b7605022da52e6ccc26fd2"
+    # Create a test file with known content
+    echo "test" > test.txt
     
-    assert_success "Checksum verification should pass for valid file" verify_checksum "$temp_file" "$test_sha"
-    assert_failure "Checksum verification should fail for invalid SHA" verify_checksum "$temp_file" "invalid_sha"
+    # Create checksum file (f2ca1bb6c7e907d06dafe4687e579fce76b37e4e93b7605022da52e6ccc26fd2 is SHA256 of "test\n")
+    echo "f2ca1bb6c7e907d06dafe4687e579fce76b37e4e93b7605022da52e6ccc26fd2  test.txt" > test.txt.sha256
     
-    rm "$temp_file"
+    # Test verification
+    assert_success "Checksum verification should pass for valid file" verify_checksum test.txt
+    
+    # Test with invalid checksum
+    echo "invalid_sha  test.txt" > test.txt.sha256
+    assert_failure "Checksum verification should fail for invalid SHA" verify_checksum test.txt
+    
+    # Clean up
+    cd - > /dev/null || exit 1
+    rm -rf "$temp_dir"
 }
 
 # Integration Tests

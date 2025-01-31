@@ -1,21 +1,30 @@
 use thiserror::Error;
 
-#[derive(Error, Debug)]
-pub enum EssexError {
-    #[error("Template error: {0}")]
-    TemplateError(#[from] tera::Error),
+pub type Result<T> = std::result::Result<T, Error>;
 
-    #[error("IO error: {0}")]
-    IoError(#[from] std::io::Error),
+#[derive(Debug, Error)]
+pub enum Error {
+    #[error("Template not found: {0}")]
+    TemplateNotFound(String),
 
     #[error("Invalid project name: {0}")]
     InvalidProjectName(String),
 
-    #[error("Template not found: {0}")]
-    TemplateNotFound(String),
+    #[error("Invalid template: {0}")]
+    InvalidTemplate(String),
 
-    #[error("Project directory error: {0}")]
-    ProjectDirectoryError(String),
+    #[error("Task join error: {0}")]
+    TaskJoinError(String),
+
+    #[error(transparent)]
+    Io(#[from] std::io::Error),
+
+    #[error(transparent)]
+    StripPrefix(#[from] std::path::StripPrefixError),
+
+    #[error(transparent)]
+    Tera(#[from] tera::Error),
+
+    #[error(transparent)]
+    Anyhow(#[from] anyhow::Error),
 }
-
-pub type Result<T> = std::result::Result<T, EssexError>;
