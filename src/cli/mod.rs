@@ -212,8 +212,14 @@ mod tests {
         }
 
         // Test zsh completion with output
-        let cli = Cli::try_parse_from(["essex", "completion", "zsh", "--output", "/tmp/completions"])
-            .unwrap();
+        let cli = Cli::try_parse_from([
+            "essex",
+            "completion",
+            "zsh",
+            "--output",
+            "/tmp/completions",
+        ])
+        .unwrap();
         match cli.command {
             Commands::Completion { shell, output } => {
                 assert!(matches!(shell, Shell::Zsh));
@@ -239,8 +245,14 @@ mod tests {
         let completion_dir = temp_dir.path().join("completions");
         fs::create_dir(&completion_dir)?;
 
-        let cli = Cli::try_parse_from(["essex", "completion", "zsh", "--output", "/tmp/completions"])
-            .unwrap();
+        let cli = Cli::try_parse_from([
+            "essex",
+            "completion",
+            "zsh",
+            "--output",
+            "/tmp/completions",
+        ])
+        .unwrap();
         assert!(cli.execute().is_ok());
 
         Ok(())
