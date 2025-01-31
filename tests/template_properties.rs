@@ -19,9 +19,9 @@ proptest! {
             Some(username.clone()),
             Some(vendor.clone())
         ).unwrap();
-        
+
         let context_map = context.into_context();
-        
+
         // Verify context properties
         prop_assert_eq!(context_map.get("repo_namespace").unwrap().as_str().unwrap(), namespace);
         prop_assert_eq!(context_map.get("image_name").unwrap().as_str().unwrap(), name);
@@ -39,17 +39,17 @@ proptest! {
         let project = format!("{}/{}", namespace, name);
         let temp_dir = tempdir().unwrap();
         let output_dir = temp_dir.path().join("test-output");
-        
+
         let mut engine = TemplateEngine::new(".").unwrap();
         let context = TemplateContext::new(
             &project,
             Some(username),
             Some(vendor)
         ).unwrap();
-        
+
         let result = engine.generate("basic", context, &output_dir);
         prop_assert!(result.is_ok());
-        
+
         // Verify essential files exist
         let required_files = vec![
             "Dockerfile",
@@ -57,7 +57,7 @@ proptest! {
             "README.md",
             "runtime-assets/usr/local/bin/entrypoint.sh",
         ];
-        
+
         for file in required_files {
             prop_assert!(output_dir.join(file).exists());
         }
@@ -68,11 +68,11 @@ proptest! {
 fn test_template_context_edge_cases() {
     // Test empty project name
     assert!(TemplateContext::new("", None, None).is_err());
-    
+
     // Test very long inputs
     let long_string = "a".repeat(256);
     assert!(TemplateContext::new(&long_string, None, None).is_err());
-    
+
     // Test special characters
     assert!(TemplateContext::new("project#name", None, None).is_err());
 
@@ -93,13 +93,15 @@ fn test_template_context_edge_cases() {
 fn test_template_generation_error_cases() {
     let temp_dir = tempdir().unwrap();
     let output_dir = temp_dir.path().join("test-output");
-    
+
     let mut engine = TemplateEngine::new(".").unwrap();
-    
+
     // Test with non-existent template
     let context = TemplateContext::new("test/project", None, None).unwrap();
-    assert!(engine.generate("non_existent_template", context, &output_dir).is_err());
-    
+    assert!(engine
+        .generate("non_existent_template", context, &output_dir)
+        .is_err());
+
     // Test with invalid output directory
     let context = TemplateContext::new("test/project", None, None).unwrap();
     let invalid_dir = PathBuf::from("/nonexistent/directory");

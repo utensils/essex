@@ -13,8 +13,8 @@ pub enum Error {
     #[error("Invalid template: {0}")]
     InvalidTemplate(String),
 
-    #[error("Task join error: {0}")]
-    TaskJoinError(String),
+    #[error("Join error: {0}")]
+    JoinError(String),
 
     #[error(transparent)]
     Io(#[from] std::io::Error),

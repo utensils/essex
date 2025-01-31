@@ -1,6 +1,6 @@
 use clap::Parser;
-use error::Result;
 use cli::Cli;
+use error::Result;
 
 mod cli;
 mod error;

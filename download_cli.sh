@@ -67,12 +67,44 @@ detect_platform() {
 
 # Get the latest version from GitHub API
 get_latest_version() {
-    local version
-    version=$(curl -s "https://api.github.com/repos/${ESSEX_REPO}/releases/latest" | grep '"tag_name":' | cut -d '"' -f 4)
-    if [ -z "$version" ]; then
-        error "Failed to fetch latest version"
+    local version response
+    local auth_header=""
+    
+    # Use GitHub token if available
+    if [ -n "${GITHUB_TOKEN}" ]; then
+        auth_header="Authorization: token ${GITHUB_TOKEN}"
+    fi
+    
+    # Make API request with proper error handling
+    if [ -n "$auth_header" ]; then
+        response=$(curl -sS -H "${auth_header}" "https://api.github.com/repos/${ESSEX_REPO}/releases/latest")
+    else
+        response=$(curl -sS "https://api.github.com/repos/${ESSEX_REPO}/releases/latest")
+    fi
+    
+    # Check if curl failed
+    if [ $? -ne 0 ]; then
+        error "Failed to connect to GitHub API"
         return 1
     fi
+    
+    # Check for API errors
+    if echo "$response" | grep -q "API rate limit exceeded"; then
+        error "GitHub API rate limit exceeded. Set GITHUB_TOKEN environment variable to increase rate limit."
+        return 1
+    fi
+    
+    if echo "$response" | grep -q "\"message\":"; then
+        error "GitHub API error: $(echo "$response" | grep -o '"message":"[^"]*"' | cut -d'"' -f4)"
+        return 1
+    fi
+    
+    version=$(echo "$response" | grep '"tag_name":' | cut -d '"' -f 4)
+    if [ -z "$version" ]; then
+        error "Failed to parse version from GitHub API response"
+        return 1
+    fi
+    
     echo "$version"
 }
 

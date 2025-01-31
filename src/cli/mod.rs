@@ -1,9 +1,12 @@
+use clap::{CommandFactory, Parser};
+use clap_complete::{
+    generate,
+    shells::{Bash, Zsh},
+};
 use std::path::PathBuf;
-use clap::{Parser, CommandFactory};
-use clap_complete::{generate, shells::{Bash, Zsh}};
 
 use crate::error::{Error, Result};
-use crate::template::{TemplateEngine, TemplateContext};
+use crate::template::{TemplateContext, TemplateEngine};
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -65,7 +68,12 @@ impl Cli {
                 }
                 Ok(())
             }
-            Commands::New { template, project, username, vendor } => {
+            Commands::New {
+                template,
+                project,
+                username,
+                vendor,
+            } => {
                 // Validate template exists
                 let templates = engine.list_templates()?;
                 if !templates.contains(&template) {
@@ -77,18 +85,22 @@ impl Cli {
                 if parts.len() != 2 {
                     return Err(Error::InvalidProjectName(project));
                 }
-                
+
                 // Create project directory inside a directory named after the namespace
                 let namespace_dir = PathBuf::from(parts[0]);
                 let project_dir = namespace_dir.join(parts[1]);
-                
+
                 if project_dir.exists() {
-                    return Err(Error::InvalidTemplate(
-                        format!("Directory '{}' already exists", project_dir.display())
-                    ));
+                    return Err(Error::InvalidTemplate(format!(
+                        "Directory '{}' already exists",
+                        project_dir.display()
+                    )));
                 }
 
-                println!("Creating new project '{}' using template '{}'", project, template);
+                println!(
+                    "Creating new project '{}' using template '{}'",
+                    project, template
+                );
                 engine.generate(&template, context, &project_dir)?;
                 println!("Project created successfully!");
                 Ok(())
@@ -101,7 +113,8 @@ impl Cli {
                     Shell::Bash => {
                         if let Some(out_dir) = output {
                             std::fs::create_dir_all(&out_dir)?;
-                            let mut file = std::fs::File::create(out_dir.join(format!("{}.bash", bin_name)))?;
+                            let mut file =
+                                std::fs::File::create(out_dir.join(format!("{}.bash", bin_name)))?;
                             generate(Bash, &mut cmd, bin_name, &mut file);
                             println!("Bash completion script written to {:?}", file);
                         } else {
@@ -111,7 +124,8 @@ impl Cli {
                     Shell::Zsh => {
                         if let Some(out_dir) = output {
                             std::fs::create_dir_all(&out_dir)?;
-                            let mut file = std::fs::File::create(out_dir.join(format!("_{}", bin_name)))?;
+                            let mut file =
+                                std::fs::File::create(out_dir.join(format!("_{}", bin_name)))?;
                             generate(Zsh, &mut cmd, bin_name, &mut file);
                             println!("Zsh completion script written to {:?}", file);
                         } else {
@@ -138,13 +152,24 @@ mod tests {
     #[test]
     fn test_new_command_parsing() {
         let cli = Cli::try_parse_from(&[
-            "essex", "new", "basic", "test/project",
-            "--username", "testuser",
-            "--vendor", "Test Corp"
-        ]).unwrap();
+            "essex",
+            "new",
+            "basic",
+            "test/project",
+            "--username",
+            "testuser",
+            "--vendor",
+            "Test Corp",
+        ])
+        .unwrap();
 
         match cli.command {
-            Commands::New { template, project, username, vendor } => {
+            Commands::New {
+                template,
+                project,
+                username,
+                vendor,
+            } => {
                 assert_eq!(template, "basic");
                 assert_eq!(project, "test/project");
                 assert_eq!(username, Some("testuser".to_string()));
@@ -170,7 +195,9 @@ mod tests {
     fn test_validate_template() {
         let cli = Cli::try_parse_from(&["essex", "new", "basic", "test/project"]).unwrap();
         match cli.command {
-            Commands::New { template, project, .. } => {
+            Commands::New {
+                template, project, ..
+            } => {
                 assert_eq!(template, "basic");
                 assert_eq!(project, "test/project");
             }

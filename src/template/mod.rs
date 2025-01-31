@@ -1,13 +1,13 @@
 use chrono::Utc;
 use include_dir::{include_dir, Dir, DirEntry};
 use serde::Serialize;
+use std::future::Future;
 use std::path::Path;
+use std::pin::Pin;
 use tera::{Context, Tera};
 use tokio::fs;
 use tokio::task;
 use tokio::task::JoinError;
-use std::future::Future;
-use std::pin::Pin;
 
 use crate::error::{Error, Result};
 
@@ -33,7 +33,9 @@ impl TemplateContext {
 
         // Validate that namespace and project name only contain alphanumeric characters, hyphens, and underscores
         let valid_chars = |s: &str| {
-            !s.is_empty() && s.chars().all(|c| c.is_alphanumeric() || c == '-' || c == '_')
+            !s.is_empty()
+                && s.chars()
+                    .all(|c| c.is_alphanumeric() || c == '-' || c == '_')
         };
 
         if !valid_chars(parts[0]) || !valid_chars(parts[1]) {
@@ -109,7 +111,8 @@ impl TemplateEngine {
             .ok_or_else(|| Error::TemplateNotFound(template.to_string()))?;
 
         // Process template files recursively
-        self.process_directory_async(template_dir, output_dir, &context).await?;
+        self.process_directory_async(template_dir, output_dir, &context)
+            .await?;
 
         Ok(())
     }
@@ -127,14 +130,21 @@ impl TemplateEngine {
             for entry in dir.entries() {
                 match entry {
                     DirEntry::Dir(subdir) => {
-                        let new_output_dir = output_dir.join(subdir.path().strip_prefix(dir.path())?);
+                        let new_output_dir =
+                            output_dir.join(subdir.path().strip_prefix(dir.path())?);
                         fs::create_dir_all(&new_output_dir).await?;
-                        self.process_directory_async(subdir, &new_output_dir, context).await?;
+                        self.process_directory_async(subdir, &new_output_dir, context)
+                            .await?;
                     }
                     DirEntry::File(file) => {
                         let output_path = output_dir.join(file.path().strip_prefix(dir.path())?);
-                        let content = file.contents_utf8()
-                            .ok_or_else(|| Error::InvalidTemplate("Template file is not valid UTF-8".to_string()))?
+                        let content = file
+                            .contents_utf8()
+                            .ok_or_else(|| {
+                                Error::InvalidTemplate(
+                                    "Template file is not valid UTF-8".to_string(),
+                                )
+                            })?
                             .to_string();
                         let context = context.clone();
                         let output_path = output_path.to_path_buf();
@@ -165,7 +175,8 @@ impl TemplateEngine {
 
             // Wait for all tasks to complete
             for task in tasks {
-                task.await.map_err(|e: JoinError| Error::TaskJoinError(e.to_string()))??;
+                task.await
+                    .map_err(|e: JoinError| Error::JoinError(e.to_string()))??;
             }
 
             Ok(())
@@ -209,7 +220,7 @@ impl TemplateEngine {
                     let rel_path = subdir.path().strip_prefix(dir.path())?;
                     let output_subdir = to.join(rel_path);
                     std::fs::create_dir_all(&output_subdir)?;
-                    
+
                     // Recursively process the subdirectory
                     self.copy_template_files(subdir, &output_subdir, context)?;
                 }
@@ -221,9 +232,9 @@ impl TemplateEngine {
                         std::fs::create_dir_all(parent)?;
                     }
 
-                    let content = file
-                        .contents_utf8()
-                        .ok_or_else(|| Error::InvalidTemplate("Template file is not valid UTF-8".to_string()))?;
+                    let content = file.contents_utf8().ok_or_else(|| {
+                        Error::InvalidTemplate("Template file is not valid UTF-8".to_string())
+                    })?;
                     let rendered = self.tera.render_str(content, context)?;
                     std::fs::write(&output_path, rendered)?;
 
@@ -266,7 +277,9 @@ mod tests {
         let dockerfile = temp_dir.path().join("Dockerfile");
         assert!(dockerfile.exists());
         let content = std::fs::read_to_string(dockerfile)?;
-        assert!(content.contains("org.opencontainers.image.authors=\"testuser <contact@example.com>\""));
+        assert!(
+            content.contains("org.opencontainers.image.authors=\"testuser <contact@example.com>\"")
+        );
 
         Ok(())
     }
