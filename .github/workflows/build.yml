@@ -210,10 +210,50 @@ jobs:
           essex-${{ matrix.target }}.${{ matrix.os == 'windows-latest' && 'zip' || 'tar.gz' }}.sha256
         retention-days: 5
 
+  create-tag:
+    name: create-tag
+    # Only run on main branch when Cargo.toml version changes
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.check-version.outputs.version }}
+      should_tag: ${{ steps.check-version.outputs.should_tag }}
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check version change
+        id: check-version
+        run: |
+          # Get the current version from Cargo.toml
+          CURRENT_VERSION=$(grep '^version = ' Cargo.toml | cut -d '"' -f2)
+          echo "version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+          
+          # Check if this version is already tagged
+          if git rev-parse "v$CURRENT_VERSION" >/dev/null 2>&1; then
+            echo "Version v$CURRENT_VERSION is already tagged"
+            echo "should_tag=false" >> $GITHUB_OUTPUT
+          else
+            echo "Version v$CURRENT_VERSION needs to be tagged"
+            echo "should_tag=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create and push tag
+        if: steps.check-version.outputs.should_tag == 'true'
+        run: |
+          VERSION=${{ steps.check-version.outputs.version }}
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git tag -a "v$VERSION" -m "Release v$VERSION"
+          git push origin "v$VERSION"
+
   release:
     name: release
-    needs: [build-and-test, lint]
-    if: startsWith(github.ref, 'refs/tags/')
+    needs: [build-and-test, lint, create-tag]
+    if: needs.create-tag.outputs.should_tag == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
