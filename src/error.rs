@@ -43,3 +43,57 @@ impl From<std::path::StripPrefixError> for Error {
         Error::InvalidPath(error.to_string())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::path::Path;
+
+    #[test]
+    fn test_error_display() {
+        // Test IoError
+        let io_error = std::io::Error::new(std::io::ErrorKind::NotFound, "file not found");
+        let error = Error::IoError(io_error);
+        assert!(error.to_string().contains("IO error: file not found"));
+
+        // Test TemplateError
+        let error = Error::TemplateError("invalid syntax".to_string());
+        assert!(error.to_string().contains("Template error: invalid syntax"));
+
+        // Test TemplateNotFound
+        let error = Error::TemplateNotFound("basic".to_string());
+        assert!(error.to_string().contains("Template not found: basic"));
+
+        // Test InvalidTemplate
+        let error = Error::InvalidTemplate("missing field".to_string());
+        assert!(error.to_string().contains("Invalid template: missing field"));
+
+        // Test InvalidPath
+        let error = Error::InvalidPath("invalid/path".to_string());
+        assert!(error.to_string().contains("Invalid path: invalid/path"));
+
+        // Test InvalidProjectName
+        let error = Error::InvalidProjectName("invalid name".to_string());
+        assert!(error.to_string().contains("Invalid project name: invalid name"));
+    }
+
+    #[test]
+    fn test_error_conversions() {
+        // Test From<std::io::Error>
+        let io_error = std::io::Error::new(std::io::ErrorKind::NotFound, "file not found");
+        let error: Error = io_error.into();
+        assert!(matches!(error, Error::IoError(_)));
+
+        // Test From<tera::Error>
+        let tera_error = tera::Error::msg("template error");
+        let error: Error = tera_error.into();
+        assert!(matches!(error, Error::TemplateError(_)));
+
+        // Test From<std::path::StripPrefixError>
+        let path = Path::new("/a/b/c");
+        let base = Path::new("/x/y/z");
+        let strip_error = path.strip_prefix(base).unwrap_err();
+        let error: Error = strip_error.into();
+        assert!(matches!(error, Error::InvalidPath(_)));
+    }
+}
