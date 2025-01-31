@@ -1,13 +1,9 @@
 use chrono::Utc;
 use include_dir::{include_dir, Dir, DirEntry};
 use serde::Serialize;
-use std::future::Future;
 use std::path::Path;
-use std::pin::Pin;
 use tera::{Context, Tera};
 use tokio::fs;
-use tokio::task;
-use tokio::task::JoinError;
 
 use crate::error::{Error, Result};
 
@@ -88,8 +84,9 @@ impl TemplateEngine {
     }
 
     /// Generate a project asynchronously
+    #[allow(dead_code)]
     pub async fn generate_async(
-        &mut self,
+        &self,
         template: &str,
         context: TemplateContext,
         output_dir: &Path,
@@ -117,70 +114,48 @@ impl TemplateEngine {
         Ok(())
     }
 
-    /// Process a directory recursively
-    fn process_directory_async<'a>(
+    #[allow(dead_code)]
+    #[allow(clippy::only_used_in_recursion)]
+    async fn process_directory_async<'a>(
         &'a self,
         dir: &'a Dir<'_>,
         output_dir: &'a Path,
         context: &'a Context,
-    ) -> Pin<Box<dyn Future<Output = Result<()>> + Send + 'a>> {
-        Box::pin(async move {
-            let mut tasks = Vec::new();
+    ) -> std::result::Result<(), Error> {
+        for entry in dir.entries() {
+            match entry {
+                DirEntry::Dir(subdir) => {
+                    let new_output_dir = output_dir.join(subdir.path().strip_prefix(dir.path())?);
+                    fs::create_dir_all(&new_output_dir).await?;
+                    Box::pin(self.process_directory_async(subdir, &new_output_dir, context))
+                        .await?;
+                }
+                DirEntry::File(file) => {
+                    let output_path = output_dir.join(file.path().strip_prefix(dir.path())?);
+                    let content = file
+                        .contents_utf8()
+                        .ok_or_else(|| {
+                            Error::InvalidTemplate("Template file is not valid UTF-8".to_string())
+                        })?
+                        .to_string();
+                    let rendered = tera::Tera::one_off(&content, context, false)?;
+                    fs::write(&output_path, rendered).await?;
 
-            for entry in dir.entries() {
-                match entry {
-                    DirEntry::Dir(subdir) => {
-                        let new_output_dir =
-                            output_dir.join(subdir.path().strip_prefix(dir.path())?);
-                        fs::create_dir_all(&new_output_dir).await?;
-                        self.process_directory_async(subdir, &new_output_dir, context)
-                            .await?;
-                    }
-                    DirEntry::File(file) => {
-                        let output_path = output_dir.join(file.path().strip_prefix(dir.path())?);
-                        let content = file
-                            .contents_utf8()
-                            .ok_or_else(|| {
-                                Error::InvalidTemplate(
-                                    "Template file is not valid UTF-8".to_string(),
-                                )
-                            })?
-                            .to_string();
-                        let context = context.clone();
-                        let output_path = output_path.to_path_buf();
-
-                        tasks.push(task::spawn(async move {
-                            if let Some(parent) = output_path.parent() {
-                                fs::create_dir_all(parent).await?;
-                            }
-
-                            let rendered = tera::Tera::one_off(&content, &context, false)?;
-                            fs::write(&output_path, rendered).await?;
-
-                            // Set executable permissions for .sh files
-                            if output_path.extension().map_or(false, |ext| ext == "sh") {
-                                #[cfg(unix)]
-                                {
-                                    use std::os::unix::fs::PermissionsExt;
-                                    let mut perms = fs::metadata(&output_path).await?.permissions();
-                                    perms.set_mode(0o755);
-                                    fs::set_permissions(&output_path, perms).await?;
-                                }
-                            }
-                            Ok::<(), anyhow::Error>(())
-                        }));
+                    // Set executable permissions for .sh files
+                    if output_path.extension().is_some_and(|ext| ext == "sh") {
+                        #[cfg(unix)]
+                        {
+                            use std::os::unix::fs::PermissionsExt;
+                            let mut perms = fs::metadata(&output_path).await?.permissions();
+                            perms.set_mode(0o755);
+                            fs::set_permissions(&output_path, perms).await?;
+                        }
                     }
                 }
             }
+        }
 
-            // Wait for all tasks to complete
-            for task in tasks {
-                task.await
-                    .map_err(|e: JoinError| Error::JoinError(e.to_string()))??;
-            }
-
-            Ok(())
-        })
+        Ok(())
     }
 
     pub fn generate(
@@ -239,7 +214,7 @@ impl TemplateEngine {
                     std::fs::write(&output_path, rendered)?;
 
                     // Set executable permissions for .sh files
-                    if output_path.extension().map_or(false, |ext| ext == "sh") {
+                    if output_path.extension().is_some_and(|ext| ext == "sh") {
                         #[cfg(unix)]
                         {
                             use std::os::unix::fs::PermissionsExt;

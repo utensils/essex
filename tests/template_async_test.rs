@@ -10,7 +10,7 @@ fn test_async_template_generation() {
         let temp_dir = tempdir().unwrap();
         let output_dir = temp_dir.path().join("test-output");
 
-        let mut engine = TemplateEngine::new(".").unwrap();
+        let engine = TemplateEngine::new(".").unwrap();
         let context = TemplateContext::new(
             "test/project",
             Some("testuser".to_string()),
@@ -61,7 +61,7 @@ fn test_async_template_generation_parallel() {
             )
             .unwrap();
 
-            let mut engine = TemplateEngine::new(".").unwrap();
+            let engine = TemplateEngine::new(".").unwrap();
             handles.push(tokio::spawn(async move {
                 engine
                     .generate_async("basic", context, &output_dir)
@@ -105,7 +105,7 @@ fn test_async_template_error_handling() {
         let temp_dir = tempdir().unwrap();
         let output_dir = temp_dir.path().join("test-output");
 
-        let mut engine = TemplateEngine::new(".").unwrap();
+        let engine = TemplateEngine::new(".").unwrap();
 
         // Test with non-existent template
         let context = TemplateContext::new(
@@ -129,7 +129,7 @@ fn test_async_template_variable_substitution() {
         let temp_dir = tempdir().unwrap();
         let output_dir = temp_dir.path().join("test-output");
 
-        let mut engine = TemplateEngine::new(".").unwrap();
+        let engine = TemplateEngine::new(".").unwrap();
         let context = TemplateContext::new(
             "myorg/myproject",
             Some("testuser".to_string()),

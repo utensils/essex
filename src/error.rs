@@ -1,30 +1,45 @@
-use thiserror::Error;
-
 pub type Result<T> = std::result::Result<T, Error>;
 
-#[derive(Debug, Error)]
+#[derive(Debug)]
+#[allow(clippy::enum_variant_names)]
 pub enum Error {
-    #[error("Template not found: {0}")]
+    IoError(std::io::Error),
+    TemplateError(String),
     TemplateNotFound(String),
-
-    #[error("Invalid project name: {0}")]
-    InvalidProjectName(String),
-
-    #[error("Invalid template: {0}")]
     InvalidTemplate(String),
+    InvalidPath(String),
+    InvalidProjectName(String),
+}
 
-    #[error("Join error: {0}")]
-    JoinError(String),
+impl std::error::Error for Error {}
 
-    #[error(transparent)]
-    Io(#[from] std::io::Error),
+impl std::fmt::Display for Error {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Error::IoError(e) => write!(f, "IO error: {}", e),
+            Error::TemplateError(e) => write!(f, "Template error: {}", e),
+            Error::TemplateNotFound(e) => write!(f, "Template not found: {}", e),
+            Error::InvalidTemplate(e) => write!(f, "Invalid template: {}", e),
+            Error::InvalidPath(e) => write!(f, "Invalid path: {}", e),
+            Error::InvalidProjectName(e) => write!(f, "Invalid project name: {}", e),
+        }
+    }
+}
 
-    #[error(transparent)]
-    StripPrefix(#[from] std::path::StripPrefixError),
+impl From<std::io::Error> for Error {
+    fn from(error: std::io::Error) -> Self {
+        Error::IoError(error)
+    }
+}
 
-    #[error(transparent)]
-    Tera(#[from] tera::Error),
+impl From<tera::Error> for Error {
+    fn from(error: tera::Error) -> Self {
+        Error::TemplateError(error.to_string())
+    }
+}
 
-    #[error(transparent)]
-    Anyhow(#[from] anyhow::Error),
+impl From<std::path::StripPrefixError> for Error {
+    fn from(error: std::path::StripPrefixError) -> Self {
+        Error::InvalidPath(error.to_string())
+    }
 }
