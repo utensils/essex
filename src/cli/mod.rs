@@ -142,6 +142,9 @@ impl Cli {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use clap::{Parser, ValueEnum};
+    use std::fs;
+    use tempfile::tempdir;
 
     #[test]
     fn test_list_command_parsing() {
@@ -151,6 +154,24 @@ mod tests {
 
     #[test]
     fn test_new_command_parsing() {
+        // Test basic new command
+        let cli = Cli::try_parse_from(["essex", "new", "basic", "test/project"]).unwrap();
+        match cli.command {
+            Commands::New {
+                template,
+                project,
+                username,
+                vendor,
+            } => {
+                assert_eq!(template, "basic");
+                assert_eq!(project, "test/project");
+                assert!(username.is_none());
+                assert!(vendor.is_none());
+            }
+            _ => panic!("Expected New command"),
+        }
+
+        // Test new command with all options
         let cli = Cli::try_parse_from([
             "essex",
             "new",
@@ -162,7 +183,6 @@ mod tests {
             "Test Corp",
         ])
         .unwrap();
-
         match cli.command {
             Commands::New {
                 template,
@@ -172,8 +192,8 @@ mod tests {
             } => {
                 assert_eq!(template, "basic");
                 assert_eq!(project, "test/project");
-                assert_eq!(username, Some("testuser".to_string()));
-                assert_eq!(vendor, Some("Test Corp".to_string()));
+                assert_eq!(username.unwrap(), "testuser");
+                assert_eq!(vendor.unwrap(), "Test Corp");
             }
             _ => panic!("Expected New command"),
         }
@@ -181,6 +201,7 @@ mod tests {
 
     #[test]
     fn test_completion_command_parsing() {
+        // Test bash completion
         let cli = Cli::try_parse_from(["essex", "completion", "bash"]).unwrap();
         match cli.command {
             Commands::Completion { shell, output } => {
@@ -189,19 +210,48 @@ mod tests {
             }
             _ => panic!("Expected Completion command"),
         }
+
+        // Test zsh completion with output
+        let cli =
+            Cli::try_parse_from(["essex", "completion", "zsh", "--output", "/tmp/completions"])
+                .unwrap();
+        match cli.command {
+            Commands::Completion { shell, output } => {
+                assert!(matches!(shell, Shell::Zsh));
+                assert_eq!(output.unwrap(), PathBuf::from("/tmp/completions"));
+            }
+            _ => panic!("Expected Completion command"),
+        }
     }
 
     #[test]
-    fn test_validate_template() {
-        let cli = Cli::try_parse_from(["essex", "new", "basic", "test/project"]).unwrap();
-        match cli.command {
-            Commands::New {
-                template, project, ..
-            } => {
-                assert_eq!(template, "basic");
-                assert_eq!(project, "test/project");
-            }
-            _ => panic!("Expected New command"),
-        }
+    fn test_cli_execute() -> Result<()> {
+        let temp_dir = tempdir()?;
+
+        // Test list command
+        let cli = Cli::try_parse_from(["essex", "list"]).unwrap();
+        assert!(cli.execute().is_ok());
+
+        // Test new command with invalid template
+        let cli = Cli::try_parse_from(["essex", "new", "non-existent", "test/project"]).unwrap();
+        assert!(cli.execute().is_err());
+
+        // Test completion command
+        let completion_dir = temp_dir.path().join("completions");
+        fs::create_dir(&completion_dir)?;
+
+        let cli =
+            Cli::try_parse_from(["essex", "completion", "zsh", "--output", "/tmp/completions"])
+                .unwrap();
+        assert!(cli.execute().is_ok());
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_shell_enum() {
+        assert!(matches!(Shell::from_str("bash", true), Ok(Shell::Bash)));
+        assert!(matches!(Shell::from_str("zsh", true), Ok(Shell::Zsh)));
+        assert!(Shell::from_str("fish", true).is_err());
     }
 }

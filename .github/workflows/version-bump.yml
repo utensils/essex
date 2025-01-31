@@ -20,7 +20,15 @@ permissions:
 
 jobs:
   version-bump:
-    if: github.event_name == 'workflow_dispatch' || (contains(github.event.pull_request.labels.*.name, 'release') && !contains(github.event.head_commit.message, 'bump version'))
+    # Only run if:
+    # 1. It's a workflow_dispatch event OR
+    # 2. It's a label event with 'release' label AND the commit doesn't contain 'bump version' AND
+    #    we haven't already processed this PR (checking automated label)
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (contains(github.event.pull_request.labels.*.name, 'release') &&
+       !contains(github.event.head_commit.message, 'bump version') &&
+       !contains(github.event.pull_request.labels.*.name, 'automated'))
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -31,7 +39,7 @@ jobs:
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: ${{ env.RUST_VERSION }}
+          toolchain: stable
       
       - name: Install cargo-edit
         run: cargo install cargo-edit

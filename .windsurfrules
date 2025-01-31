@@ -1,70 +1,89 @@
-This is Essex, a Docker project template generator written in Rust. It helps create consistent and well-structured Docker projects.
+# Essex AI Assistant Guidelines
 
-# Project Context
-- Essex is designed to generate Docker projects from templates with a focus on best practices and consistency
-- The project uses Tera templating (Jinja2-like syntax) for template generation
-- The main binary is written in Rust and requires Rust 1.70 or later
+## Project Identity
+Essex is a Rust-based Docker project template generator focused on consistency and best practices.
 
-# Project Structure
-- `/src`: Contains the Rust source code for the Essex binary
-- `/templates`: Contains the template definitions
-  - `/templates/basic`: The basic template which includes Dockerfile, Makefile, README.md, and runtime assets
-- Each generated project follows a consistent structure with:
-  - Dockerfile (uses best practices and OCI-compliant labels)
-  - Makefile (for common Docker operations)
-  - README.md
-  - runtime-assets (containing entrypoint scripts and other assets)
+## Code Style Requirements
+1. ALWAYS enforce these Rust formatting rules:
+    ```toml
+    # .rustfmt.toml settings
+    max_width = 100
+    hard_tabs = false
+    tab_spaces = 4
+    newline_style = "Auto"
+    use_small_heuristics = "Default"
+    reorder_imports = true
+    reorder_modules = true
+    remove_nested_parens = true
+    edition = "2021"
+    merge_derives = true
+    use_field_init_shorthand = true
+    use_try_shorthand = true
+    force_explicit_abi = true
+    ```
 
-# Development Guidelines
-- Follow Test-Driven Development (TDD) practices:
-  - Write tests first before implementing new features
-  - Ensure each new feature or bug fix has corresponding tests
-  - Keep test coverage high and meaningful
-- All code changes should maintain backward compatibility with existing templates
-- Follow Rust best practices and idiomatic code patterns
-- Ensure all templates follow Docker best practices:
-  - Use multi-stage builds where appropriate
-  - Include proper OCI labels
-  - Follow principle of least privilege (run as non-root user)
-  - Include proper documentation
-- Always ensure our cargo version matches our git tag for releases
+2. ALWAYS enforce these Clippy rules via RUSTFLAGS:
+    ```bash
+    RUSTFLAGS="-D warnings -D clippy::redundant-pattern-matching -D clippy::needless-borrows-for-generic-args"
+    ```
 
-# Testing Requirements
-- Run `cargo test` to ensure all tests pass before submitting changes
-- Test template generation with different parameters
-- Verify generated Dockerfiles can be built successfully
-- Check that Makefiles in templates work as expected
+## Development Rules
+1. NEVER skip running these checks before committing:
+   - `cargo fmt --all -- --check`
+   - `cargo clippy` with required RUSTFLAGS
+   - `cargo test`
 
-# Important Files
-- README.md: Primary documentation source
-- src/main.rs: Entry point for the Essex binary
-- templates/basic/*: Core template files that serve as examples
+2. ALWAYS maintain these standards:
+   - Write tests before implementing features (TDD)
+   - Keep backward compatibility with existing templates
+   - Follow idiomatic Rust patterns
+   - Match cargo version with git tags for releases
 
-# Build Process
-- Use `cargo build --release` for production builds
-- Development builds can use `cargo build`
-- Generated projects use Make for building Docker images
+3. ALWAYS follow these Docker best practices:
+   - Use multi-stage builds
+   - Include OCI labels
+   - Run as non-root user
+   - Provide comprehensive documentation
 
-# Template Variables
-The following variables are commonly used in templates:
-- repo_username: GitHub/container registry username
-- repo_namespace: Organization/namespace for the project
-- image_name: Name of the Docker image
-- vendor: Company/organization name
-- version: Project version
-- build_date: Build timestamp
-- vcs_ref: Git commit reference
+## Template Rules
+1. ALWAYS include these components in generated projects:
+   - Dockerfile with best practices
+   - Makefile for Docker operations
+   - README.md
+   - runtime-assets directory
 
-# Best Practices
-- Keep templates minimal but functional
-- Ensure all generated projects include proper documentation
-- Follow security best practices in Dockerfile templates
-- Include comprehensive error handling in Rust code
-- Document any new template variables or features
+2. ALWAYS support these template variables:
+   - repo_username
+   - repo_namespace
+   - image_name
+   - vendor
+   - version
+   - build_date
+   - vcs_ref
 
-When working with this project, please:
-1. Consult the README.md first for basic information
-2. Run tests before making any changes
-3. Maintain the existing project structure
-4. Follow the established coding style and practices
-5. Update documentation when adding new features
+## Documentation Rules
+1. ALWAYS update documentation when:
+   - Adding new features
+   - Modifying template variables
+   - Changing project structure
+   - Updating dependencies
+
+2. ALWAYS maintain these files:
+   - README.md for project overview
+   - CONTRIBUTING.md for development guidelines
+   - Template-specific documentation
+
+## Error Handling Rules
+1. ALWAYS provide:
+   - Clear error messages
+   - Proper error types
+   - Recovery suggestions
+   - Debug information when appropriate
+
+## Testing Rules
+1. ALWAYS verify:
+   - Template generation with various parameters
+   - Docker build success for generated projects
+   - Makefile functionality
+   - Unit test coverage
+   - Integration test coverage
