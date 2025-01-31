@@ -44,11 +44,6 @@ labels:
 branches:
   - name: main
     protection:
-      # Require PR reviews
-      required_pull_request_reviews:
-        required_approving_review_count: 1
-        dismiss_stale_reviews: true
-        require_code_owner_reviews: false
       # Require status checks
       required_status_checks:
         strict: true
