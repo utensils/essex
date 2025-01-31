@@ -145,13 +145,13 @@ mod tests {
 
     #[test]
     fn test_list_command_parsing() {
-        let cli = Cli::try_parse_from(&["essex", "list"]).unwrap();
+        let cli = Cli::try_parse_from(["essex", "list"]).unwrap();
         assert!(matches!(cli.command, Commands::List));
     }
 
     #[test]
     fn test_new_command_parsing() {
-        let cli = Cli::try_parse_from(&[
+        let cli = Cli::try_parse_from([
             "essex",
             "new",
             "basic",
@@ -181,7 +181,7 @@ mod tests {
 
     #[test]
     fn test_completion_command_parsing() {
-        let cli = Cli::try_parse_from(&["essex", "completion", "bash"]).unwrap();
+        let cli = Cli::try_parse_from(["essex", "completion", "bash"]).unwrap();
         match cli.command {
             Commands::Completion { shell, output } => {
                 assert!(matches!(shell, Shell::Bash));
@@ -193,7 +193,7 @@ mod tests {
 
     #[test]
     fn test_validate_template() {
-        let cli = Cli::try_parse_from(&["essex", "new", "basic", "test/project"]).unwrap();
+        let cli = Cli::try_parse_from(["essex", "new", "basic", "test/project"]).unwrap();
         match cli.command {
             Commands::New {
                 template, project, ..

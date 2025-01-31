@@ -15,6 +15,8 @@ env:
   CARGO_TERM_COLOR: always
   RUST_BACKTRACE: 1
   CARGO_NET_RETRY: 2
+  RUSTFLAGS: "-D warnings -D clippy::redundant-pattern-matching -D clippy::needless-borrows-for-generic-args"
+  RUST_VERSION: "1.70.0"
 
 permissions:
   contents: read
@@ -30,6 +32,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt, clippy
+          toolchain: ${{ env.RUST_VERSION }}
       
       - name: Cache cargo registry
         uses: actions/cache@v3
@@ -38,13 +41,20 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             target
-          key: ${{ runner.os }}-cargo-lint-${{ hashFiles('**/Cargo.lock') }}
+            ~/.rustup
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock', '**/Cargo.toml', 'rust-toolchain.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
       
       - name: Check formatting
         run: cargo fmt --all -- --check
       
       - name: Run clippy
-        run: cargo clippy --all-targets --all-features -- -D warnings
+        run: |
+          cargo clippy --all-targets --all-features -- \
+            -D warnings \
+            -D clippy::redundant-pattern-matching \
+            -D clippy::needless-borrows-for-generic-args
       
       - name: Install cargo-deny
         run: cargo install --locked cargo-deny
@@ -107,6 +117,12 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        target: ${{ matrix.target }}
+        toolchain: ${{ env.RUST_VERSION }}
+
     - name: Cache cargo registry
       uses: actions/cache@v3
       with:
@@ -114,7 +130,10 @@ jobs:
           ~/.cargo/registry
           ~/.cargo/git
           target
-        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          ~/.rustup
+        key: ${{ runner.os }}-${{ matrix.target }}-cargo-${{ hashFiles('**/Cargo.lock', '**/Cargo.toml', 'rust-toolchain.toml') }}
+        restore-keys: |
+          ${{ runner.os }}-${{ matrix.target }}-cargo-
 
     - name: Cache cargo bin
       uses: actions/cache@v3
@@ -136,11 +155,6 @@ jobs:
         
         # Set environment variable for tests to use the template
         echo "GIT_CONFIG_GLOBAL=/tmp/git-template/config" >> $GITHUB_ENV
-
-    - name: Install Rust toolchain
-      uses: dtolnay/rust-toolchain@stable
-      with:
-        targets: ${{ matrix.target }}
 
     - name: Install cross (if needed)
       if: matrix.use_cross

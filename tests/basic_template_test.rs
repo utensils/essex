@@ -6,10 +6,11 @@ use tempfile::TempDir;
 
 fn setup_git_config(project_dir: &PathBuf) {
     // Try local config first
-    if let Err(_) = StdCommand::new("git")
+    if StdCommand::new("git")
         .args(["config", "--local", "user.email", "test@example.com"])
         .current_dir(project_dir)
         .output()
+        .is_err()
     {
         // Fallback to global config if local fails
         StdCommand::new("git")
