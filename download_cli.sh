@@ -14,18 +14,25 @@ export ESSEX_REPO="utensils/essex"
 
 # Print step information
 info() {
-    echo -e "${BLUE}==>${NC} $1" >&2
+    echo -e "${BLUE}==>${NC} $1"
 }
 
 # Print success messages
 success() {
-    echo -e "${GREEN}==>${NC} $1" >&2
+    echo -e "${GREEN}==>${NC} $1"
 }
 
 # Print error messages
 error() {
     echo -e "${RED}==>${NC} $1" >&2
     return 1
+}
+
+# Print debug messages
+debug() {
+    if [ "${DEBUG:-0}" = "1" ]; then
+        echo "DEBUG: $1" >&2
+    fi
 }
 
 # Detect the operating system and architecture
@@ -61,7 +68,7 @@ detect_platform() {
             ;;
     esac
     
-    echo "Unsupported platform: $os/$arch" >&2
+    error "Unsupported platform: $os/$arch"
     return 1
 }
 
@@ -69,6 +76,12 @@ detect_platform() {
 get_latest_version() {
     local version response
     local auth_header=""
+    local curl_opts="-f"
+    
+    # Add silent flag if not in debug mode
+    if [ "${DEBUG:-0}" != "1" ]; then
+        curl_opts+="s"
+    fi
     
     # Use GitHub token if available
     if [ -n "${GITHUB_TOKEN}" ]; then
@@ -77,9 +90,9 @@ get_latest_version() {
     
     # Make API request with proper error handling
     if [ -n "$auth_header" ]; then
-        response=$(curl -sS -H "${auth_header}" "https://api.github.com/repos/${ESSEX_REPO}/releases/latest")
+        response=$(curl $curl_opts -H "${auth_header}" "https://api.github.com/repos/${ESSEX_REPO}/releases/latest")
     else
-        response=$(curl -sS "https://api.github.com/repos/${ESSEX_REPO}/releases/latest")
+        response=$(curl $curl_opts "https://api.github.com/repos/${ESSEX_REPO}/releases/latest")
     fi
     
     # Check if curl failed
@@ -115,13 +128,19 @@ verify_checksum() {
     local computed_sha
     local checksum_file="${file}.sha256"
     local remote_checksum="$2"
+    local curl_opts="-fL"
     
-    echo "Debug - Verifying checksum for file: $file"
-    echo "Debug - Checksum file: $checksum_file"
+    # Add silent flag if not in debug mode
+    if [ "${DEBUG:-0}" != "1" ]; then
+        curl_opts+="s"
+    fi
+    
+    debug "Verifying checksum for file: $file"
+    debug "Checksum file: $checksum_file"
     
     # Download checksum file if it doesn't exist and remote checksum is provided
     if [ ! -f "$checksum_file" ] && [ -n "$remote_checksum" ]; then
-        if ! curl -L --fail -o "$checksum_file" "${remote_checksum}.sha256"; then
+        if ! curl $curl_opts --fail -o "$checksum_file" "${remote_checksum}.sha256"; then
             error "Failed to download checksum file"
             return 1
         fi
@@ -131,7 +150,7 @@ verify_checksum() {
     fi
     
     expected_sha=$(cut -d ' ' -f 1 < "$checksum_file")
-    echo "Debug - Expected SHA: $expected_sha"
+    debug "Expected SHA: $expected_sha"
     
     if command -v sha256sum >/dev/null 2>&1; then
         computed_sha=$(sha256sum "$file" | cut -d ' ' -f 1)
@@ -142,9 +161,7 @@ verify_checksum() {
         return 1
     fi
     
-    echo "Debug - Computed SHA: $computed_sha"
-    echo "Debug - File contents:"
-    cat "$file" | xxd
+    debug "Computed SHA: $computed_sha"
     
     if [ "$computed_sha" != "$expected_sha" ]; then
         error "Checksum verification failed"
@@ -162,9 +179,15 @@ install_essex() {
     local base_url="https://github.com/${ESSEX_REPO}/releases/download/${version}"
     local archive_name="essex-${platform}.tar.gz"
     local download_url="${base_url}/${archive_name}"
+    local curl_opts="-fL"
+    
+    # Add silent flag if not in debug mode
+    if [ "${DEBUG:-0}" != "1" ]; then
+        curl_opts+="s"
+    fi
     
     info "Downloading Essex ${version} for ${platform}..."
-    if ! curl -L --fail "$download_url" -o "${temp_dir}/${archive_name}"; then
+    if ! curl $curl_opts "$download_url" -o "${temp_dir}/${archive_name}"; then
         error "Download failed"
         rm -rf "$temp_dir"
         return 1
