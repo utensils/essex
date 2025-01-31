@@ -18,6 +18,27 @@ repository:
   # Automatically delete head branches after merging PRs
   delete_branch_on_merge: true
 
+# Labels for issues and pull requests
+labels:
+  - name: release
+    color: "0E8A16"
+    description: "Triggers version bump workflow"
+  - name: major
+    color: "B60205"
+    description: "Major version bump (breaking changes)"
+  - name: minor
+    color: "1D76DB"
+    description: "Minor version bump (new features)"
+  - name: patch
+    color: "0E8A16"
+    description: "Patch version bump (bug fixes)"
+  - name: automated
+    color: "BFDADC"
+    description: "Automated changes"
+  - name: version-bump
+    color: "5319E7"
+    description: "Version bump changes"
+
 # Branch protection rules
 branches:
   - name: main
