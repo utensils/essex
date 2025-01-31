@@ -148,14 +148,14 @@ mod tests {
 
     #[test]
     fn test_list_command_parsing() {
-        let cli = Cli::try_parse_from(&["essex", "list"]).unwrap();
+        let cli = Cli::try_parse_from(["essex", "list"]).unwrap();
         assert!(matches!(cli.command, Commands::List));
     }
 
     #[test]
     fn test_new_command_parsing() {
         // Test basic new command
-        let cli = Cli::try_parse_from(&["essex", "new", "basic", "test/project"]).unwrap();
+        let cli = Cli::try_parse_from(["essex", "new", "basic", "test/project"]).unwrap();
         match cli.command {
             Commands::New {
                 template,
@@ -172,7 +172,7 @@ mod tests {
         }
 
         // Test new command with all options
-        let cli = Cli::try_parse_from(&[
+        let cli = Cli::try_parse_from([
             "essex",
             "new",
             "basic",
@@ -202,7 +202,7 @@ mod tests {
     #[test]
     fn test_completion_command_parsing() {
         // Test bash completion
-        let cli = Cli::try_parse_from(&["essex", "completion", "bash"]).unwrap();
+        let cli = Cli::try_parse_from(["essex", "completion", "bash"]).unwrap();
         match cli.command {
             Commands::Completion { shell, output } => {
                 assert!(matches!(shell, Shell::Bash));
@@ -212,9 +212,8 @@ mod tests {
         }
 
         // Test zsh completion with output
-        let cli =
-            Cli::try_parse_from(&["essex", "completion", "zsh", "--output", "/tmp/completions"])
-                .unwrap();
+        let cli = Cli::try_parse_from(["essex", "completion", "zsh", "--output", "/tmp/completions"])
+            .unwrap();
         match cli.command {
             Commands::Completion { shell, output } => {
                 assert!(matches!(shell, Shell::Zsh));
@@ -229,20 +228,19 @@ mod tests {
         let temp_dir = tempdir()?;
 
         // Test list command
-        let cli = Cli::try_parse_from(&["essex", "list"]).unwrap();
+        let cli = Cli::try_parse_from(["essex", "list"]).unwrap();
         assert!(cli.execute().is_ok());
 
         // Test new command with invalid template
-        let cli = Cli::try_parse_from(&["essex", "new", "non-existent", "test/project"]).unwrap();
+        let cli = Cli::try_parse_from(["essex", "new", "non-existent", "test/project"]).unwrap();
         assert!(cli.execute().is_err());
 
         // Test completion command
         let completion_dir = temp_dir.path().join("completions");
         fs::create_dir(&completion_dir)?;
 
-        let cli =
-            Cli::try_parse_from(&["essex", "completion", "zsh", "--output", "/tmp/completions"])
-                .unwrap();
+        let cli = Cli::try_parse_from(["essex", "completion", "zsh", "--output", "/tmp/completions"])
+            .unwrap();
         assert!(cli.execute().is_ok());
 
         Ok(())
