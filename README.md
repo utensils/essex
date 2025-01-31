@@ -16,7 +16,7 @@ A Docker project template generator that helps create consistent and well-struct
 ### Quick Install (Linux and macOS)
 
 ```bash
-curl -fsSL https://github.com/utensils/essex/releases/latest/download/download_cli.sh | bash
+curl -fsSL -o essex-install.sh https://github.com/utensils/essex/releases/latest/download/download_cli.sh && bash essex-install.sh
 ```
 
 This script will:
