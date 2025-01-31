@@ -85,7 +85,7 @@ jobs:
           fail_ci_if_error: true
 
   build-and-test:
-    name: Build and Test ${{ matrix.target }}
+    name: build-and-test (${{ matrix.target }})
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
     env:
