@@ -67,7 +67,7 @@ echo -e "\n${YELLOW}Running unit tests...${NC}"
 # Test platform detection
 test_platform_detection() {
     echo "Testing platform detection..."
-    local platform os arch expected_platform
+    local platform os arch expected_platform result=0
     os="$(uname -s)"
     arch="$(uname -m)"
     echo "Debug - OS: $os, Arch: $arch"
@@ -100,6 +100,8 @@ test_platform_detection() {
     echo "Debug - Expected platform: $expected_platform"
     
     assert_equals "$expected_platform" "$platform" "Should detect correct platform"
+    result=$?
+    return $result
 }
 
 # Test version fetching
@@ -158,19 +160,21 @@ test_full_installation() {
 
 # Run all tests
 run_tests() {
-    test_platform_detection
-    test_version_fetching
-    test_checksum_verification
-    test_full_installation
+    local exit_code=0
     
-    echo
-    if [ $failed_tests -eq 0 ]; then
-        echo -e "${GREEN}All tests passed! ($total_tests tests)${NC}"
-        return 0
-    else
-        echo -e "${RED}$failed_tests test(s) failed out of $total_tests total tests${NC}"
-        return 1
-    fi
+    # Run all test functions
+    test_platform_detection || exit_code=$?
+    test_version_fetching || exit_code=$?
+    test_checksum_verification || exit_code=$?
+    test_full_installation || exit_code=$?
+    
+    # Print test summary
+    echo -e "\n${YELLOW}Test Summary${NC}"
+    echo "Total tests: $total_tests"
+    echo "Failed tests: $failed_tests"
+    
+    # Return overall test result
+    return $exit_code
 }
 
 # Run tests
