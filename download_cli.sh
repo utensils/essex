@@ -79,8 +79,19 @@ get_latest_version() {
 # Verify SHA256 checksum
 verify_checksum() {
     local file="$1"
-    local expected_sha="$2"
+    local expected_sha
     local computed_sha
+    local checksum_file="${file}.sha256"
+    
+    # Download checksum file if it doesn't exist
+    if [ ! -f "$checksum_file" ]; then
+        if ! curl -L --fail -o "$checksum_file" "${2}.sha256"; then
+            error "Failed to download checksum file"
+            return 1
+        fi
+    fi
+    
+    expected_sha=$(cat "$checksum_file" | cut -d ' ' -f 1)
     
     if command -v sha256sum >/dev/null 2>&1; then
         computed_sha=$(sha256sum "$file" | cut -d ' ' -f 1)
@@ -93,6 +104,7 @@ verify_checksum() {
     
     if [ "$computed_sha" != "$expected_sha" ]; then
         error "Checksum verification failed"
+        rm -f "$file" "$checksum_file"
         return 1
     fi
     return 0
@@ -104,17 +116,25 @@ install_essex() {
     local platform="$2"
     local temp_dir
     temp_dir=$(mktemp -d)
-    local download_url="https://github.com/${ESSEX_REPO}/releases/download/${version}/essex-${platform}.tar.gz"
+    local base_url="https://github.com/${ESSEX_REPO}/releases/download/${version}"
+    local archive_name="essex-${platform}.tar.gz"
+    local download_url="${base_url}/${archive_name}"
     
     info "Downloading Essex ${version} for ${platform}..."
-    if ! curl -L --fail "$download_url" -o "${temp_dir}/essex.tar.gz"; then
+    if ! curl -L --fail "$download_url" -o "${temp_dir}/${archive_name}"; then
         error "Download failed"
         rm -rf "$temp_dir"
         return 1
     fi
     
+    info "Verifying checksum..."
+    if ! verify_checksum "${temp_dir}/${archive_name}" "$download_url"; then
+        rm -rf "$temp_dir"
+        return 1
+    fi
+    
     info "Extracting..."
-    if ! tar xzf "${temp_dir}/essex.tar.gz" -C "$temp_dir"; then
+    if ! tar xzf "${temp_dir}/${archive_name}" -C "$temp_dir"; then
         error "Extraction failed"
         rm -rf "$temp_dir"
         return 1

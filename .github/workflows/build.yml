@@ -114,12 +114,20 @@ jobs:
           tar czf ../../../essex-${{ matrix.target }}.tar.gz ${{ matrix.binary_name }}
         fi
         cd -
+        # Generate checksum for the archive
+        if [ "${{ matrix.os }}" = "windows-latest" ]; then
+          shasum -a 256 essex-${{ matrix.target }}.zip > essex-${{ matrix.target }}.zip.sha256
+        else
+          shasum -a 256 essex-${{ matrix.target }}.tar.gz > essex-${{ matrix.target }}.tar.gz.sha256
+        fi
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
         name: essex-${{ matrix.target }}
-        path: essex-${{ matrix.target }}.${{ matrix.os == 'windows-latest' && 'zip' || 'tar.gz' }}
+        path: |
+          essex-${{ matrix.target }}.${{ matrix.os == 'windows-latest' && 'zip' || 'tar.gz' }}
+          essex-${{ matrix.target }}.${{ matrix.os == 'windows-latest' && 'zip' || 'tar.gz' }}.sha256
         retention-days: 5
 
   release:
