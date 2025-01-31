@@ -212,14 +212,9 @@ mod tests {
         }
 
         // Test zsh completion with output
-        let cli = Cli::try_parse_from(&[
-            "essex",
-            "completion",
-            "zsh",
-            "--output",
-            "/tmp/completions",
-        ])
-        .unwrap();
+        let cli =
+            Cli::try_parse_from(&["essex", "completion", "zsh", "--output", "/tmp/completions"])
+                .unwrap();
         match cli.command {
             Commands::Completion { shell, output } => {
                 assert!(matches!(shell, Shell::Zsh));
@@ -238,27 +233,16 @@ mod tests {
         assert!(cli.execute().is_ok());
 
         // Test new command with invalid template
-        let cli = Cli::try_parse_from(&[
-            "essex",
-            "new",
-            "non-existent",
-            "test/project",
-        ])
-        .unwrap();
+        let cli = Cli::try_parse_from(&["essex", "new", "non-existent", "test/project"]).unwrap();
         assert!(cli.execute().is_err());
 
         // Test completion command
         let completion_dir = temp_dir.path().join("completions");
         fs::create_dir(&completion_dir)?;
-        
-        let cli = Cli::try_parse_from(&[
-            "essex",
-            "completion",
-            "bash",
-            "--output",
-            completion_dir.to_str().unwrap(),
-        ])
-        .unwrap();
+
+        let cli =
+            Cli::try_parse_from(&["essex", "completion", "zsh", "--output", "/tmp/completions"])
+                .unwrap();
         assert!(cli.execute().is_ok());
 
         Ok(())

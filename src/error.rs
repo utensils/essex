@@ -66,7 +66,9 @@ mod tests {
 
         // Test InvalidTemplate
         let error = Error::InvalidTemplate("missing field".to_string());
-        assert!(error.to_string().contains("Invalid template: missing field"));
+        assert!(error
+            .to_string()
+            .contains("Invalid template: missing field"));
 
         // Test InvalidPath
         let error = Error::InvalidPath("invalid/path".to_string());
@@ -74,7 +76,9 @@ mod tests {
 
         // Test InvalidProjectName
         let error = Error::InvalidProjectName("invalid name".to_string());
-        assert!(error.to_string().contains("Invalid project name: invalid name"));
+        assert!(error
+            .to_string()
+            .contains("Invalid project name: invalid name"));
     }
 
     #[test]
