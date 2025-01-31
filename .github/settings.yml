@@ -1,0 +1,37 @@
+# Repository settings managed by https://github.com/apps/settings
+repository:
+  # Repository name
+  name: essex
+  # Repository description
+  description: A Docker project template generator written in Rust
+  # Enable issues and projects
+  has_issues: true
+  has_projects: true
+  has_wiki: false
+  # Default branch
+  default_branch: main
+  # Allow squash merging, make it default
+  allow_squash_merge: true
+  allow_merge_commit: false
+  allow_rebase_merge: false
+  squash_merge_default: true
+  # Automatically delete head branches after merging PRs
+  delete_branch_on_merge: true
+
+# Branch protection rules
+branches:
+  - name: main
+    protection:
+      # Require PR reviews
+      required_pull_request_reviews:
+        required_approving_review_count: 1
+        dismiss_stale_reviews: true
+        require_code_owner_reviews: false
+      # Require status checks
+      required_status_checks:
+        strict: true
+        contexts: ["cargo test", "cargo fmt", "cargo clippy"]
+      # Include administrators
+      enforce_admins: true
+      # Restrict who can push to this branch
+      restrictions: null
