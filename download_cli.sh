@@ -67,12 +67,44 @@ detect_platform() {
 
 # Get the latest version from GitHub API
 get_latest_version() {
-    local version
-    version=$(curl -s "https://api.github.com/repos/${ESSEX_REPO}/releases/latest" | grep '"tag_name":' | cut -d '"' -f 4)
-    if [ -z "$version" ]; then
-        error "Failed to fetch latest version"
+    local version response
+    local auth_header=""
+    
+    # Use GitHub token if available
+    if [ -n "${GITHUB_TOKEN}" ]; then
+        auth_header="Authorization: token ${GITHUB_TOKEN}"
+    fi
+    
+    # Make API request with proper error handling
+    if [ -n "$auth_header" ]; then
+        response=$(curl -sS -H "${auth_header}" "https://api.github.com/repos/${ESSEX_REPO}/releases/latest")
+    else
+        response=$(curl -sS "https://api.github.com/repos/${ESSEX_REPO}/releases/latest")
+    fi
+    
+    # Check if curl failed
+    if [ $? -ne 0 ]; then
+        error "Failed to connect to GitHub API"
         return 1
     fi
+    
+    # Check for API errors
+    if echo "$response" | grep -q "API rate limit exceeded"; then
+        error "GitHub API rate limit exceeded. Set GITHUB_TOKEN environment variable to increase rate limit."
+        return 1
+    fi
+    
+    if echo "$response" | grep -q "\"message\":"; then
+        error "GitHub API error: $(echo "$response" | grep -o '"message":"[^"]*"' | cut -d'"' -f4)"
+        return 1
+    fi
+    
+    version=$(echo "$response" | grep '"tag_name":' | cut -d '"' -f 4)
+    if [ -z "$version" ]; then
+        error "Failed to parse version from GitHub API response"
+        return 1
+    fi
+    
     echo "$version"
 }
 
@@ -82,16 +114,24 @@ verify_checksum() {
     local expected_sha
     local computed_sha
     local checksum_file="${file}.sha256"
+    local remote_checksum="$2"
     
-    # Download checksum file if it doesn't exist
-    if [ ! -f "$checksum_file" ]; then
-        if ! curl -L --fail -o "$checksum_file" "${2}.sha256"; then
+    echo "Debug - Verifying checksum for file: $file"
+    echo "Debug - Checksum file: $checksum_file"
+    
+    # Download checksum file if it doesn't exist and remote checksum is provided
+    if [ ! -f "$checksum_file" ] && [ -n "$remote_checksum" ]; then
+        if ! curl -L --fail -o "$checksum_file" "${remote_checksum}.sha256"; then
             error "Failed to download checksum file"
             return 1
         fi
+    elif [ ! -f "$checksum_file" ]; then
+        error "Checksum file not found: $checksum_file"
+        return 1
     fi
     
-    expected_sha=$(cat "$checksum_file" | cut -d ' ' -f 1)
+    expected_sha=$(cut -d ' ' -f 1 < "$checksum_file")
+    echo "Debug - Expected SHA: $expected_sha"
     
     if command -v sha256sum >/dev/null 2>&1; then
         computed_sha=$(sha256sum "$file" | cut -d ' ' -f 1)
@@ -102,9 +142,12 @@ verify_checksum() {
         return 1
     fi
     
+    echo "Debug - Computed SHA: $computed_sha"
+    echo "Debug - File contents:"
+    cat "$file" | xxd
+    
     if [ "$computed_sha" != "$expected_sha" ]; then
         error "Checksum verification failed"
-        rm -f "$file" "$checksum_file"
         return 1
     fi
     return 0

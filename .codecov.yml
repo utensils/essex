@@ -1,0 +1,27 @@
+coverage:
+  status:
+    project:
+      default:
+        # Set a coverage target of 80%
+        target: 80%
+        # Allow a 5% drop from the target
+        threshold: 5%
+    patch:
+      default:
+        # Coverage target for new code
+        target: 80%
+        # Allow a 10% drop for new code
+        threshold: 10%
+
+# Configure which files to include/exclude
+ignore:
+  - "tests/**/*"  # Ignore test files
+  - "examples/**/*"  # Ignore example files
+
+# Configure pull request comments
+comment:
+  layout: "reach, diff, flags, files"
+  behavior: default
+  require_changes: false  # If true, only post if coverage changes
+  require_base: false    # [true :: must have a base report to post]
+  require_head: true     # [true :: must have a head report to post]

@@ -153,6 +153,50 @@ cargo test                # Run Rust tests
 ./test_install.sh        # Run installer tests
 ```
 
+### Release Process
+
+The project follows semantic versioning and maintains synchronization between Cargo.toml versions and git tags.
+
+To create a new release:
+
+1. Use the version bump script:
+```bash
+./scripts/bump_version.sh 1.0.0  # Replace with your version
+```
+
+2. Review the changes:
+```bash
+git show HEAD
+```
+
+3. Push the changes:
+```bash
+git push origin main v1.0.0  # Replace with your version
+```
+
+The CI/CD pipeline will:
+- Verify that Cargo.toml version matches the git tag
+- Run all tests
+- Build binaries for all supported platforms
+- Generate SHA256 checksums
+- Create a GitHub release
+- Upload all assets
+
+### Development Guidelines
+
+- Follow Test-Driven Development (TDD) practices
+  - Write tests first before implementing new features
+  - Ensure each new feature or bug fix has corresponding tests
+  - Keep test coverage high and meaningful
+- All code changes should maintain backward compatibility with existing templates
+- Follow Rust best practices and idiomatic code patterns
+- Ensure all templates follow Docker best practices:
+  - Use multi-stage builds where appropriate
+  - Include proper OCI labels
+  - Follow principle of least privilege (run as non-root user)
+  - Include proper documentation
+- Always ensure Cargo version matches git tag for releases
+
 ## License
 
 MIT License

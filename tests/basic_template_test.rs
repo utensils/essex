@@ -6,17 +6,18 @@ use tempfile::TempDir;
 
 fn setup_git_config(project_dir: &PathBuf) {
     // Try local config first
-    if let Err(_) = StdCommand::new("git")
+    if StdCommand::new("git")
         .args(["config", "--local", "user.email", "test@example.com"])
         .current_dir(project_dir)
         .output()
+        .is_err()
     {
         // Fallback to global config if local fails
         StdCommand::new("git")
             .args(["config", "--global", "user.email", "test@example.com"])
             .output()
             .expect("Failed to set git email");
-        
+
         StdCommand::new("git")
             .args(["config", "--global", "user.name", "Test User"])
             .output()
@@ -66,7 +67,7 @@ fn setup_test_project() -> (TempDir, PathBuf) {
         .current_dir(&project_dir)
         .output()
         .expect("Failed to initialize git repository");
-    
+
     assert!(
         git_init.status.success(),
         "Git init failed: {}",
@@ -82,7 +83,7 @@ fn setup_test_project() -> (TempDir, PathBuf) {
         .current_dir(&project_dir)
         .output()
         .expect("Failed to add files to git");
-    
+
     assert!(
         git_add.status.success(),
         "Git add failed: {}",
@@ -92,15 +93,18 @@ fn setup_test_project() -> (TempDir, PathBuf) {
     // Initial commit
     let git_commit = StdCommand::new("git")
         .args([
-            "-c", "user.email=test@example.com",
-            "-c", "user.name=Test User",
+            "-c",
+            "user.email=test@example.com",
+            "-c",
+            "user.name=Test User",
             "commit",
-            "-m", "Initial commit"
+            "-m",
+            "Initial commit",
         ])
         .current_dir(&project_dir)
         .output()
         .expect("Failed to commit files");
-    
+
     assert!(
         git_commit.status.success(),
         "Git commit failed: {}",
@@ -110,16 +114,20 @@ fn setup_test_project() -> (TempDir, PathBuf) {
     // Create an initial tag
     let git_tag = StdCommand::new("git")
         .args([
-            "-c", "user.email=test@example.com",
-            "-c", "user.name=Test User",
+            "-c",
+            "user.email=test@example.com",
+            "-c",
+            "user.name=Test User",
             "tag",
-            "-a", "v0.1.0",
-            "-m", "Initial release"
+            "-a",
+            "v0.1.0",
+            "-m",
+            "Initial release",
         ])
         .current_dir(&project_dir)
         .output()
         .expect("Failed to create git tag");
-    
+
     assert!(
         git_tag.status.success(),
         "Git tag failed: {}",
@@ -157,12 +165,8 @@ fn test_template_generation() {
 
     // Verify file permissions
     let entrypoint_path = project_dir.join("runtime-assets/usr/local/bin/entrypoint.sh");
-    let metadata = fs::metadata(&entrypoint_path).unwrap_or_else(|e| {
-        panic!(
-            "Failed to get metadata for {:?}: {}",
-            entrypoint_path, e
-        )
-    });
+    let metadata = fs::metadata(&entrypoint_path)
+        .unwrap_or_else(|e| panic!("Failed to get metadata for {:?}: {}", entrypoint_path, e));
 
     #[cfg(unix)]
     {
@@ -183,12 +187,8 @@ fn test_dockerfile_contents() {
     }
     let (_temp_dir, project_dir) = setup_test_project();
     let dockerfile_path = project_dir.join("Dockerfile");
-    let dockerfile_content = fs::read_to_string(&dockerfile_path).unwrap_or_else(|e| {
-        panic!(
-            "Failed to read Dockerfile at {:?}: {}",
-            dockerfile_path, e
-        )
-    });
+    let dockerfile_content = fs::read_to_string(&dockerfile_path)
+        .unwrap_or_else(|e| panic!("Failed to read Dockerfile at {:?}: {}", dockerfile_path, e));
 
     // Check for required Dockerfile elements
     assert!(dockerfile_content.contains("ARG BASE_IMAGE=alpine:3.21"));
@@ -289,8 +289,14 @@ fn test_container_runtime() {
         .unwrap_or_else(|e| panic!("Failed to test entrypoint: {}", e));
 
     let output = String::from_utf8_lossy(&entrypoint_test.stdout);
-    assert!(output.contains("uid=1000"), "Container should run as uid 1000");
-    assert!(output.contains("essex"), "Container should run as essex user");
+    assert!(
+        output.contains("uid=1000"),
+        "Container should run as uid 1000"
+    );
+    assert!(
+        output.contains("essex"),
+        "Container should run as essex user"
+    );
 
     // Clean up
     StdCommand::new("docker")
@@ -305,9 +311,8 @@ fn test_template_variable_substitution() {
 
     // Check Makefile variables
     let makefile_path = project_dir.join("Makefile");
-    let makefile_content = fs::read_to_string(&makefile_path).unwrap_or_else(|e| {
-        panic!("Failed to read Makefile at {:?}: {}", makefile_path, e)
-    });
+    let makefile_content = fs::read_to_string(&makefile_path)
+        .unwrap_or_else(|e| panic!("Failed to read Makefile at {:?}: {}", makefile_path, e));
 
     assert!(makefile_content.contains("REPO_NAMESPACE        ?= testuser"));
     assert!(makefile_content.contains("REPO_USERNAME         ?= testuser"));
@@ -315,17 +320,10 @@ fn test_template_variable_substitution() {
 
     // Check Dockerfile labels
     let dockerfile_path = project_dir.join("Dockerfile");
-    let dockerfile_content = fs::read_to_string(&dockerfile_path).unwrap_or_else(|e| {
-        panic!(
-            "Failed to read Dockerfile at {:?}: {}",
-            dockerfile_path, e
-        )
-    });
+    let dockerfile_content = fs::read_to_string(&dockerfile_path)
+        .unwrap_or_else(|e| panic!("Failed to read Dockerfile at {:?}: {}", dockerfile_path, e));
 
-    assert!(
-        dockerfile_content.contains("org.opencontainers.image.source=\"https://github.com/testuser/test-project\"")
-    );
-    assert!(
-        dockerfile_content.contains("org.opencontainers.image.vendor=\"Test Company\"")
-    );
+    assert!(dockerfile_content
+        .contains("org.opencontainers.image.source=\"https://github.com/testuser/test-project\""));
+    assert!(dockerfile_content.contains("org.opencontainers.image.vendor=\"Test Company\""));
 }

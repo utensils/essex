@@ -1,0 +1,86 @@
+name: Version Bump
+
+on:
+  pull_request:
+    types: [labeled]
+  workflow_dispatch:
+    inputs:
+      bump_type:
+        description: 'Type of version bump'
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  version-bump:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.pull_request.labels.*.name, 'release')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
+      
+      - name: Install cargo-edit
+        run: cargo install cargo-edit
+      
+      - name: Configure Git
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+      
+      - name: Determine version bump type
+        id: bump-type
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "type=${{ inputs.bump_type }}" >> $GITHUB_OUTPUT
+          else
+            # Check PR labels for version bump type
+            if [[ "${{ contains(github.event.pull_request.labels.*.name, 'major') }}" == "true" ]]; then
+              echo "type=major" >> $GITHUB_OUTPUT
+            elif [[ "${{ contains(github.event.pull_request.labels.*.name, 'minor') }}" == "true" ]]; then
+              echo "type=minor" >> $GITHUB_OUTPUT
+            else
+              echo "type=patch" >> $GITHUB_OUTPUT
+            fi
+          fi
+      
+      - name: Get current version
+        id: current-version
+        run: |
+          CURRENT_VERSION=$(grep '^version = ' Cargo.toml | cut -d '"' -f2)
+          echo "version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+      
+      - name: Bump version
+        id: bump-version
+        run: |
+          cargo set-version --bump ${{ steps.bump-type.outputs.type }}
+          NEW_VERSION=$(grep '^version = ' Cargo.toml | cut -d '"' -f2)
+          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+      
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          title: "chore: bump version to ${{ steps.bump-version.outputs.version }}"
+          body: |
+            Automated version bump from ${{ steps.current-version.outputs.version }} to ${{ steps.bump-version.outputs.version }}
+            
+            This PR was automatically created by the version bump workflow. Once merged, a new release will be created.
+          branch: "version-bump/${{ steps.bump-version.outputs.version }}"
+          commit-message: "chore: bump version to ${{ steps.bump-version.outputs.version }}"
+          delete-branch: true
+          labels: |
+            automated
+            version-bump
