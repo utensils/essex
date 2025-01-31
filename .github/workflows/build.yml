@@ -2,10 +2,10 @@ name: Build and Test
 
 on:
   push:
-    branches: [ "**" ]
+    branches: [ "main" ]
     tags: [ "v*" ]
   pull_request:
-    branches: [ "**" ]
+    branches: [ "main" ]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
