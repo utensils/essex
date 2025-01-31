@@ -1,0 +1,3 @@
+warn-on-all-wildcard-imports = true
+redundant-pattern-matching-deny = true
+needless-borrows-for-generic-args-deny = true
