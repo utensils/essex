@@ -32,6 +32,7 @@ limit.log
 # Coverage reports
 coverage/
 *.profraw
+tarpaulin-report.html
 
 # Act artifacts
 .act
