@@ -57,7 +57,7 @@ jobs:
             -D clippy::needless-borrows-for-generic-args
       
       - name: Install cargo-deny
-        run: cargo install --locked cargo-deny
+        run: cargo install --locked --version "^0.17.0" cargo-deny
       
       - name: Run cargo-deny
         run: cargo deny check

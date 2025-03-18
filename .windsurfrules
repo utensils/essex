@@ -1,89 +1,27 @@
-# Essex AI Assistant Guidelines
+# Essex CLI Development Guide
 
-## Project Identity
-Essex is a Rust-based Docker project template generator focused on consistency and best practices.
+## Commands
+- Build: `cargo build --release`
+- Install: `cargo install --path .`
+- Test (all): `cargo test`
+- Test (single): `cargo test -- test_name`
+- Integration test: `./test_install.sh`
+- Format: `cargo fmt --all`
+- Lint: `RUSTFLAGS="-D warnings -D clippy::redundant-pattern-matching -D clippy::needless-borrows-for-generic-args" cargo clippy`
 
-## Code Style Requirements
-1. ALWAYS enforce these Rust formatting rules:
-    ```toml
-    # .rustfmt.toml settings
-    max_width = 100
-    hard_tabs = false
-    tab_spaces = 4
-    newline_style = "Auto"
-    use_small_heuristics = "Default"
-    reorder_imports = true
-    reorder_modules = true
-    remove_nested_parens = true
-    edition = "2021"
-    merge_derives = true
-    use_field_init_shorthand = true
-    use_try_shorthand = true
-    force_explicit_abi = true
-    ```
+## Code Style
+- **Formatting**: 100 char line width, 4 spaces indentation
+- **Imports**: Group by module (std → external → project)
+- **Error handling**: Custom Error enum with specific variants, uses thiserror/anyhow
+- **Naming**: snake_case for functions/variables, CamelCase for types/enums
+- **Testing**: TDD approach, unit tests with code, integration tests in tests/
+- **Types**: Rust 2021 edition, strongly typed error handling
 
-2. ALWAYS enforce these Clippy rules via RUSTFLAGS:
-    ```bash
-    RUSTFLAGS="-D warnings -D clippy::redundant-pattern-matching -D clippy::needless-borrows-for-generic-args"
-    ```
+Always run the formatter and linter before committing changes.
 
-## Development Rules
-1. NEVER skip running these checks before committing:
-   - `cargo fmt --all -- --check`
-   - `cargo clippy` with required RUSTFLAGS
-   - `cargo test`
-
-2. ALWAYS maintain these standards:
-   - Write tests before implementing features (TDD)
-   - Keep backward compatibility with existing templates
-   - Follow idiomatic Rust patterns
-   - Match cargo version with git tags for releases
-
-3. ALWAYS follow these Docker best practices:
-   - Use multi-stage builds
-   - Include OCI labels
-   - Run as non-root user
-   - Provide comprehensive documentation
-
-## Template Rules
-1. ALWAYS include these components in generated projects:
-   - Dockerfile with best practices
-   - Makefile for Docker operations
-   - README.md
-   - runtime-assets directory
-
-2. ALWAYS support these template variables:
-   - repo_username
-   - repo_namespace
-   - image_name
-   - vendor
-   - version
-   - build_date
-   - vcs_ref
-
-## Documentation Rules
-1. ALWAYS update documentation when:
-   - Adding new features
-   - Modifying template variables
-   - Changing project structure
-   - Updating dependencies
-
-2. ALWAYS maintain these files:
-   - README.md for project overview
-   - CONTRIBUTING.md for development guidelines
-   - Template-specific documentation
-
-## Error Handling Rules
-1. ALWAYS provide:
-   - Clear error messages
-   - Proper error types
-   - Recovery suggestions
-   - Debug information when appropriate
-
-## Testing Rules
-1. ALWAYS verify:
-   - Template generation with various parameters
-   - Docker build success for generated projects
-   - Makefile functionality
-   - Unit test coverage
-   - Integration test coverage
+## AI Agent Sync
+When this file is modified, copy its contents to:
+- .cursorrules
+- .windsurfrules
+- .goosehints 
+This ensures all AI coding assistants have the same information.
